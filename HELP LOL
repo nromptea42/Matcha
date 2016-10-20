@@ -1,0 +1,21 @@
+Hbs conditions ->
+
+{{# if condition }}
+    Condition is met
+{{ else }}
+    Condition not met
+{{/if}}
+
+Hbs loop ->
+
+{{# each array as |val key|}}
+    {{key }}:{{ val }}
+{{/each}}
+
+Comment ajouter un lien ->
+
+dans app.js :   var LIEN = require(LIEN);
+                app.use('LIEN', LIEN);
+dans LIEN.js : router.get('LIEN', function(req, res, next) {
+                 res.render('LIEN');
+               });
