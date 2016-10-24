@@ -1,0 +1,20 @@
+<a href="/">Home</a>
+<br />
+
+<section class="get">
+    <div>
+        {{# each items }}
+            <div class="item">
+                <div>Nom: {{ this.nom }}</div>
+                <div>Prenom: {{ this.prenom }}</div>
+                <div>Age: {{ this.age }}</div>
+                <div>ID: {{ this._id }}</div>
+            <form action="/liste/delete" method="post">
+                <input type="hidden" value="{{ this._id }}" name="id">
+                <button type="submit">Delete</button>
+                <button type="submit" formaction="/liste/profil">Profil</button>
+            </form>
+            </div>
+        {{/each}}
+    </div>
+</section>

@@ -7,6 +7,8 @@ var bodyParser = require('body-parser');
 var hbs = require('express-handlebars');
 
 var routes = require('./routes/index');
+var inscription = require('./routes/inscription');
+var liste = require('./routes/liste');
 
 var app = express();
 
@@ -24,6 +26,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
+app.use('/inscription', inscription);
+app.use('/liste', liste);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
