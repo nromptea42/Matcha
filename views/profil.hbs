@@ -3,7 +3,22 @@
 <h1>Profil</h1>
 
 <img src="http://kordouane.k.o.pic.centerblog.net/cbac2be3.png"></img>
-<div>Nom: {{ items.nom }}</div>
-<div>Prenom: {{ items.prenom }}</div>
-<div>Age: {{ items.age }}</div>
-<div>ID: {{ items._id }}</div>
+{{#if check }}<br />
+    Nom : {{items.nom}}<br />
+    Prenom : {{items.prenom}}<br />
+    Age : {{items.age }}<br />
+    <div>ID: {{ items._id }}</div>
+    <form action="/liste/profil" method="post">
+        <input type="hidden" name="id" value="{{items._id}}">
+        <input type="hidden" name="update" value="update">
+        <button type="submit">Update</button>
+    </form>
+{{ else }}
+<form action="/liste/profil/update" method="post">
+    <input type="text" name="nom" value="{{items.nom}}"><br />
+    <input type="text" name="prenom" value="{{items.prenom}}"><br />
+    <input type="text" name="age" value="{{items.age}}"><br />
+    <input type="hidden" name="id" value="{{items._id}}">
+    <button type="submit">Update</button>
+</form><br />
+{{/if}}

@@ -41,15 +41,47 @@ router.get('/profil/:id', function(req, res, next) {
         assert.equal(null, err);
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
             db.close();
-            console.log(cursor);
-            res.render('profil', {items: cursor});
+            res.render('profil', {items: cursor, check: true});
+        });
+    });
+});
+
+router.get('/profil/:id/update', function(req, res, next) {
+    mongo.connect(url, function (err, db) {
+        assert.equal(null, err);
+        db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
+            db.close();
+            res.render('profil', {items: cursor, check: false});
         });
     });
 });
 
 router.post('/profil', function(req, res, next) {
+    if (req.body.update)
+        var id = req.body.id + "/update";
+    else
+        var id = req.body.id;
+
+    res.redirect('/liste/profil/' + id);
+});
+
+
+router.post('/profil/update', function(req, res, next) {
+    var item = {
+        nom: req.body.nom,
+        prenom: req.body.prenom,
+        age: req.body.age
+    };
     var id = req.body.id;
 
+    mongo.connect(url, function (err, db) {
+        assert.equal(null, err);
+        db.collection('user-data').updateOne({"_id": objectId(id)}, {$set: item}, function (err, result) {
+            assert.equal(null, err);
+            console.log('Item updated');
+            db.close();
+        });
+    });
     res.redirect('/liste/profil/' + id);
 });
 

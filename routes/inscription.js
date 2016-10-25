@@ -17,40 +17,24 @@ router.post('/insert', function(req, res, next) {
         prenom: req.body.prenom,
         age: req.body.age
     };
-    var msg = "";
+    var msg = "Erreur lors de l'inscription";
 
     if (item.nom && item.prenom && item.age) {
         if (!isNaN(item.age)) {
-            mongo.connect(url, function (err, db) {
-                assert.equal(null, err);
-                db.collection('user-data').insertOne(item, function (err, result) {
+            if (Number(item.age) >= 18 && Number(item.age) <= 100) {
+                mongo.connect(url, function (err, db) {
                     assert.equal(null, err);
-                    console.log('Item inserted');
-                    db.close();
+                    db.collection('user-data').insertOne(item, function (err, result) {
+                        assert.equal(null, err);
+                        console.log('Item inserted');
+                        db.close();
+                    });
                 });
-            });
-            msg = "Inscription validée";
+                msg = "Inscription validée";
+            }
         }
     }
     res.render('inscription', {message: msg});
-});
-
-router.post('/update', function(req, res, next) {
-    var item = {
-        title: req.body.title,
-        content: req.body.content,
-        author: req.body.author
-    };
-    var id = req.body.id;
-
-    mongo.connect(url, function (err, db) {
-        assert.equal(null, err);
-        db.collection('user-data').updateOne({"_id": objectId(id)}, {$set: item}, function (err, result) {
-            assert.equal(null, err);
-            console.log('Item updated');
-            db.close();
-        });
-    });
 });
 
 module.exports = router;
