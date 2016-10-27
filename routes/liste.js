@@ -70,18 +70,22 @@ router.post('/profil/update', function(req, res, next) {
     var item = {
         nom: req.body.nom,
         prenom: req.body.prenom,
-        age: req.body.age
+        age: req.body.age,
+        email: req.body.email
     };
     var id = req.body.id;
-
-    mongo.connect(url, function (err, db) {
-        assert.equal(null, err);
-        db.collection('user-data').updateOne({"_id": objectId(id)}, {$set: item}, function (err, result) {
-            assert.equal(null, err);
-            console.log('Item updated');
-            db.close();
-        });
-    });
+    if (!isNaN(item.age)) {
+        if (Number(item.age) >= 18) {
+            mongo.connect(url, function (err, db) {
+                assert.equal(null, err);
+                db.collection('user-data').updateOne({"_id": objectId(id)}, {$set: item}, function (err, result) {
+                    assert.equal(null, err);
+                    console.log('Item updated');
+                    db.close();
+                });
+            });
+        }
+    }
     res.redirect('/liste/profil/' + id);
 });
 
