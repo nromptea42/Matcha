@@ -2,27 +2,26 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6c226259-9f57-4e70-b744-6ca4145f4ed9" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/data/collection-0--7879779398833454108.wt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/data/collection-0-4682300421392243951.wt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/data/diagnostic.data/metrics.2016-10-21T12-30-00Z-00000" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/data/diagnostic.data/metrics.2016-10-21T13-51-26Z-00000" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/data/diagnostic.data/metrics.2016-10-21T17-01-45Z-00000" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/data/diagnostic.data/metrics.2016-10-24T14-00-26Z-00000" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/data/diagnostic.data/metrics.2016-10-25T12-14-28Z-00000" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/data/index-1--7879779398833454108.wt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/data/index-1-4682300421392243951.wt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/data/journal/WiredTigerLog.0000000005" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/WiredTiger.wt" afterPath="$PROJECT_DIR$/data/WiredTiger.wt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/_mdb_catalog.wt" afterPath="$PROJECT_DIR$/data/_mdb_catalog.wt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/sizeStorer.wt" afterPath="$PROJECT_DIR$/data/sizeStorer.wt" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/WiredTiger" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/WiredTiger.lock" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/WiredTiger.turtle" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/WiredTiger.wt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/WiredTigerLAS.wt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/_mdb_catalog.wt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/collection-0-8977241117832476953.wt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/collection-2-8977241117832476953.wt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/diagnostic.data/metrics.2016-10-26T10-06-09Z-00000" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/diagnostic.data/metrics.2016-10-26T13-13-12Z-00000" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/diagnostic.data/metrics.2016-10-26T13-44-46Z-00000" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/index-1-8977241117832476953.wt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/index-3-8977241117832476953.wt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/journal/WiredTigerLog.0000000003" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/journal/WiredTigerPreplog.0000000001" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/journal/WiredTigerPreplog.0000000002" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/mongod.lock" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/sizeStorer.wt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/storage.bson" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/WiredTiger.turtle" afterPath="$PROJECT_DIR$/data/WiredTiger.turtle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/index.js" afterPath="$PROJECT_DIR$/routes/index.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/inscription.js" afterPath="$PROJECT_DIR$/routes/inscription.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/liste.js" afterPath="$PROJECT_DIR$/routes/liste.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views/index.hbs" afterPath="$PROJECT_DIR$/views/index.hbs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views/inscription.hbs" afterPath="$PROJECT_DIR$/views/inscription.hbs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views/profil.hbs" afterPath="$PROJECT_DIR$/views/profil.hbs" />
     </list>
     <ignored path="matcha.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -368,12 +367,12 @@
       <workItem from="1477392321759" duration="5059000" />
       <workItem from="1477475876768" duration="954000" />
       <workItem from="1477486124822" duration="5671000" />
-      <workItem from="1477562344305" duration="200000" />
+      <workItem from="1477562344305" duration="436000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="34569000" />
+    <option name="totallyTimeSpent" value="34805000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
