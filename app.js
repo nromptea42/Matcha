@@ -9,6 +9,7 @@ var hbs = require('express-handlebars');
 var routes = require('./routes/index');
 var inscription = require('./routes/inscription');
 var liste = require('./routes/liste');
+var session = require('client-sessions');
 
 var app = express();
 
@@ -24,6 +25,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+  cookieName: 'session',
+  secret: 'ptdr jrigole hehe',
+  duration: 30 * 60 * 1000,
+  activeDuration: 5 * 60 * 1000,
+}));
 
 app.use('/', routes);
 app.use('/inscription', inscription);
