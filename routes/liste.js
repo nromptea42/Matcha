@@ -8,6 +8,7 @@ var url = "mongodb://localhost:27017/test";
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+    console.log(req.session.user_id);
     var resultArray = [];
     mongo.connect(url, function (err, db) {
         assert.equal(null, err);
@@ -17,7 +18,7 @@ router.get('/', function(req, res, next) {
             resultArray.push(doc);
         }, function () {
             db.close();
-            res.render('liste', {items: resultArray});
+            res.json({items: resultArray});
         });
     });
 });

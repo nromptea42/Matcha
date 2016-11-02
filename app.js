@@ -9,8 +9,9 @@ var hbs = require('express-handlebars');
 var routes = require('./routes/index');
 var inscription = require('./routes/inscription');
 var liste = require('./routes/liste');
-var session = require('client-sessions');
+var logout = require('./routes/logout');
 
+var session = require('client-sessions');
 var app = express();
 
 // view engine setup
@@ -36,6 +37,7 @@ app.use(session({
 app.use('/', routes);
 app.use('/inscription', inscription);
 app.use('/liste', liste);
+app.use('/logout', logout);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
