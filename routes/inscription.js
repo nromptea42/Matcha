@@ -83,7 +83,7 @@ router.post('/insert', function(req, res, next) {
     }
     else
         msg.push("Tous les champs doivent etre remplis");
-    res.json({message: msg});
+    res.render('inscription', {message: msg});
 });
 
 module.exports = router;

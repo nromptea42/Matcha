@@ -18,7 +18,7 @@ router.get('/', function(req, res, next) {
             resultArray.push(doc);
         }, function () {
             db.close();
-            res.json({items: resultArray});
+            res.render('liste', {items: resultArray});
         });
     });
 });
