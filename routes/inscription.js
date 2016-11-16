@@ -33,8 +33,16 @@ function regex(value) {
         return ("ko");
 }
 
+function requireNonLogin (req, res, next) {
+    if (req.session.user) {
+        res.redirect('/');
+    } else {
+        next();
+    }
+};
+
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', requireNonLogin, function(req, res, next) {
     res.render('inscription');
 });
 

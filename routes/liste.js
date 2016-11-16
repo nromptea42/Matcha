@@ -6,8 +6,34 @@ var assert = require('assert');
 
 var url = "mongodb://localhost:27017/test";
 
+
+router.use(function (req, res, next) {
+    if (req.session && req.session.user) {
+        mongo.connect(url, function (err, db) {
+            db.collection('user-data').findOne({email: req.session.user.email}).then(function (cursor) {
+                db.close();
+                if (cursor) {
+                    console.log(cursor);
+                }
+                next();
+            });
+        });
+    } else {
+        next();
+    }
+});
+
+function requireLogin (req, res, next) {
+    if (!req.session.user) {
+        res.redirect('/');
+    } else {
+        next();
+    }
+};
+
+
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', requireLogin, function(req, res, next) {
     console.log(req.session.user_id);
     var resultArray = [];
     mongo.connect(url, function (err, db) {
