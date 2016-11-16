@@ -10,6 +10,7 @@ var routes = require('./routes/index');
 var inscription = require('./routes/inscription');
 var liste = require('./routes/liste');
 var logout = require('./routes/logout');
+var profil = require('./routes/profil');
 
 var session = require('client-sessions');
 var app = express();
@@ -30,14 +31,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
   cookieName: 'session',
   secret: 'ptdr jrigole hehe',
-  duration: 30 * 60 * 1000,
-  activeDuration: 5 * 60 * 1000,
+  duration: 60 * 60 * 1000,
+  activeDuration: 10 * 60 * 1000,
 }));
 
 app.use('/', routes);
 app.use('/inscription', inscription);
 app.use('/liste', liste);
 app.use('/logout', logout);
+app.use('/profil', profil);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -17,65 +17,42 @@ function requireLogin (req, res, next) {
 
 /* GET home page. */
 router.get('/', requireLogin, function(req, res, next) {
-    var resultArray = [];
-    mongo.connect(url, function (err, db) {
-        assert.equal(null, err);
-        var cursor = db.collection('user-data').find().sort({_id : -1});
-        cursor.forEach(function (doc, err) {
-            assert.equal(null, err);
-            resultArray.push(doc);
-        }, function () {
-            db.close();
-            res.render('liste', {items: resultArray});
-        });
-    });
+    id = req.session.user._id;
+    res.redirect('/profil/' + id);
 });
 
-router.post('/delete', function(req, res, next) {
-    var id = req.body.id;
+router.post('/oui', function(req, res, next) {
+    if (req.body.update && (req.session.user._id == req.body.id))
+        var id = req.session.user._id + "/update";
+    else
+        var id = req.body.id;
 
-    mongo.connect(url, function (err, db) {
-        assert.equal(null, err);
-        db.collection('user-data').deleteOne({"_id": objectId(id)}, function (err, result) {
-            assert.equal(null, err);
-            console.log('Item deleted');
-            db.close();
-            res.redirect('/liste');
-        });
-    });
+    res.redirect('/profil/' + id);
 });
 
-router.get('/profil/:id', function(req, res, next) {
+router.get('/:id', function(req, res, next) {
     mongo.connect(url, function (err, db) {
         assert.equal(null, err);
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
             db.close();
+            /* Check pour data en dur + bouton vers route 'oui' */
             res.render('profil', {items: cursor, check: true});
         });
     });
 });
 
-router.get('/profil/:id/update', function(req, res, next) {
+router.get('/:id/update', function(req, res, next) {
     mongo.connect(url, function (err, db) {
         assert.equal(null, err);
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
             db.close();
+            /* Check pour data en formulaire + bouton vers route 'update' */
             res.render('profil', {items: cursor, check: false});
         });
     });
 });
 
-router.post('/profil', function(req, res, next) {
-    if (req.body.update)
-        var id = req.body.id + "/update";
-    else
-        var id = req.body.id;
-
-    res.redirect('/liste/profil/' + id);
-});
-
-
-router.post('/profil/update', function(req, res, next) {
+router.post('/update', function(req, res, next) {
     var item = {
         nom: req.body.nom,
         prenom: req.body.prenom,
@@ -95,7 +72,7 @@ router.post('/profil/update', function(req, res, next) {
             });
         }
     }
-    res.redirect('/liste/profil/' + id);
+    res.redirect('/profil/' + id);
 });
 
 module.exports = router;

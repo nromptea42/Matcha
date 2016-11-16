@@ -14,7 +14,8 @@ router.use(function (req, res, next) {
             db.collection('user-data').findOne({email: req.session.user.email}).then(function (cursor) {
                 db.close();
                 if (cursor) {
-                    console.log(cursor);
+                    req.session.user = cursor;
+                    console.log(req.session.user);
                 }
                 next();
                 });
@@ -26,7 +27,7 @@ router.use(function (req, res, next) {
 
 function requireLogin (req, res, next) {
     if (!req.session.user) {
-        res.render('index');
+        res.render('login');
     } else {
         next();
     }
@@ -34,7 +35,7 @@ function requireLogin (req, res, next) {
 
 /* GET home page. */
 router.get('/', requireLogin, function(req, res, next) {
-        res.render('member');
+        res.render('index');
 });
 
 router.post('/login', function(req, res, next) {
