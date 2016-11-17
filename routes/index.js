@@ -15,7 +15,7 @@ router.use(function (req, res, next) {
                 db.close();
                 if (cursor) {
                     req.session.user = cursor;
-                    console.log(req.session.user);
+                    // console.log(req.session.user);
                 }
                 next();
                 });

@@ -53,7 +53,8 @@ router.post('/insert', function(req, res, next) {
         age: req.body.age,
         email: req.body.email,
         mdp: "",
-        salt: ""
+        salt: "",
+        src_img: "http://kordouane.k.o.pic.centerblog.net/cbac2be3.png"
     };
     var msg = [];
     var mdp = req.body.mdp;

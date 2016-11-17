@@ -6,6 +6,29 @@ var assert = require('assert');
 
 var url = "mongodb://localhost:27017/test";
 
+var multer  = require('multer');
+var storage =  multer.diskStorage({
+    destination: function (req, file, callback) {
+        callback(null, 'public/images/');
+    },
+    filename: function (req, file, callback) {
+        callback(null, file.originalname);
+    }
+})
+var upload = multer({
+    storage: storage,
+    limits: { fileSize: 1 * 1000 * 1000 },
+    fileFilter: function (req, file, cb) {
+        if (regex_img(file.mimetype) == "ko") {
+            return cb(null, false, new Error('goes wrong on the mimetype'));
+        }
+        else {
+            cb(null, true);
+        }
+
+    }
+});
+
 function requireLogin (req, res, next) {
     if (!req.session.user) {
         res.redirect('/');
@@ -14,10 +37,18 @@ function requireLogin (req, res, next) {
     }
 };
 
+function regex_img(value) {
+    var regex1 = /^image\/(jpg|jpeg|png)/;
+    var match1 = regex1.test(value);
+    if (match1)
+        return ("ok");
+    else
+        return ("ko");
+}
 
 /* GET home page. */
 router.get('/', requireLogin, function(req, res, next) {
-    id = req.session.user._id;
+    var id = req.session.user._id;
     res.redirect('/profil/' + id);
 });
 
@@ -73,6 +104,26 @@ router.post('/update', function(req, res, next) {
         }
     }
     res.redirect('/profil/' + id);
+});
+
+router.post('/add_photo', upload.single('photo'), function(req, res, next) {
+    var item = {
+      src_img: ""
+    };
+    if (req.file) {
+        console.log(req.file);
+        item.src_img = "/" + req.file.path;
+        mongo.connect(url, function (err, db) {
+            assert.equal(null, err);
+            db.collection('user-data').updateOne({"_id": objectId(req.body.id)}, {$set: item}, function (err, result) {
+                assert.equal(null, err);
+                console.log('Item updated');
+                db.close();
+            });
+        });
+        // console.log(req.file);
+    }
+    res.redirect('/profil/' + req.body.id);
 });
 
 module.exports = router;

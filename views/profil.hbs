@@ -1,6 +1,6 @@
 <h1>{{ items.prenom }}</h1>
 
-<img src="http://kordouane.k.o.pic.centerblog.net/cbac2be3.png"></img>
+<img class="photo" src="{{items.src_img}}">
 {{#if check }}<br />
     <div>Nom : {{items.nom}}</div>
     <div>Prenom : {{items.prenom}}</div>
@@ -12,12 +12,19 @@
         <button type="submit">Update</button>
     </form>
 {{ else }}
-<form action="/profil/update" method="post">
-    <input type="text" name="nom" value="{{items.nom}}"><br />
-    <input type="text" name="prenom" value="{{items.prenom}}"><br />
-    <input type="text" name="age" value="{{items.age}}"><br />
-    <input type="email" name="email" value="{{ items.email }}"><br />
-    <input type="hidden" name="id" value="{{items._id}}">
-    <button type="submit">Update</button>
-</form><br />
+    <form action="/profil/update" method="post">
+        <input type="text" name="nom" value="{{items.nom}}"><br />
+        <input type="text" name="prenom" value="{{items.prenom}}"><br />
+        <input type="text" name="age" value="{{items.age}}"><br />
+        <input type="email" name="email" value="{{ items.email }}"><br />
+        <input type="hidden" name="id" value="{{items._id}}">
+        <button type="submit">Update</button>
+    </form>
+
+    <br />
+    <form action="/profil/add_photo" method="post" enctype="multipart/form-data">
+        <input type="file" name="photo" value="" />
+        <input type="hidden" name="id" value="{{items._id}}" />
+        <input type="submit" name="submit" value="Publier" />
+    </form>
 {{/if}}
