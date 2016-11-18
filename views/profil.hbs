@@ -2,10 +2,18 @@
 
 <img class="photo" src="{{items.src_img}}">
 {{#if check }}<br />
+    <div>Id: {{ items._id }}</div>
     <div>Nom : {{items.nom}}</div>
     <div>Prenom : {{items.prenom}}</div>
     <div>Age : {{items.age }}</div>
-    <div>ID: {{ items._id }}</div>
+    <div>Sexe : {{items.sexe}}</div>
+    <div>Je recherche : {{items.need}}</div>
+    <div>Description : {{items.bio}}</div>
+    <div>Tags :
+    {{# each items.tags }}
+        {{this}}
+    {{/each}}
+    </div>
     <form action="/profil/oui" method="post">
         <input type="hidden" name="id" value="{{items._id}}">
         <input type="hidden" name="update" value="update">
@@ -13,10 +21,46 @@
     </form>
 {{ else }}
     <form action="/profil/update" method="post">
-        <input type="text" name="nom" value="{{items.nom}}"><br />
-        <input type="text" name="prenom" value="{{items.prenom}}"><br />
-        <input type="text" name="age" value="{{items.age}}"><br />
-        <input type="email" name="email" value="{{ items.email }}"><br />
+        <div class="input">
+            <label for="Nom">Nom</label>
+            <input type="text" id="nom" name="nom" value="{{items.nom}}">
+        </div>
+        <div class="input">
+            <label for="prenom">Prenom</label>
+            <input type="text" id="prenom" name="prenom" value="{{items.prenom}}">
+        </div>
+        <div class="input">
+            <label for="age">Age</label>
+            <input type="text" id="age" name="age" value="{{items.age}}">
+        </div>
+        <div class="input">
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email" value="{{items.email}}">
+        </div>
+        <div class="input">
+            <label>Sexe</label><br />
+            <input type="radio" id="sexe1" name="sexe" value="Homme"/>
+            <label for="sexe1">Homme</label>
+            <input type="radio" id="sexe2" name="sexe" value="Femme" />
+            <label for="sexe2">Femme</label>
+        </div><br />
+        <div class="input">
+            <label>A la recherche de :</label><br />
+            <input type="radio" id="need1" name="need" value="Homme"/>
+            <label for="need1">Homme</label>
+            <input type="radio" id="need2" name="need" value="Femme" />
+            <label for="need2">Femme</label>
+            <input type="radio" id="need3" name="need" value="Les deux" />
+            <label for="need3">Les deux</label>
+        </div><br />
+        <div class="input">
+            <label for="bio">Description</label>
+            <textarea class="materialize-textarea" id="bio" name="bio">{{items.bio}}</textarea>
+        </div>
+        <div class="input">
+            <label for="tags">Tags</label>
+            <input type="text" id="tags" name="tags" value="{{items.tags_str}}">
+        </div>
         <input type="hidden" name="id" value="{{items._id}}">
         <button type="submit">Update</button>
     </form>

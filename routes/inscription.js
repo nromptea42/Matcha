@@ -54,7 +54,15 @@ router.post('/insert', function(req, res, next) {
         email: req.body.email,
         mdp: "",
         salt: "",
-        src_img: "http://kordouane.k.o.pic.centerblog.net/cbac2be3.png"
+        src_img: "https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png",
+        src_img_2: "",
+        src_img_3: "",
+        src_img_4: "",
+        src_img_5: "",
+        sexe: "",
+        need: "Les deux",
+        bio: "",
+        tags: []
     };
     var msg = [];
     var mdp = req.body.mdp;

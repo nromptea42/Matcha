@@ -88,9 +88,28 @@ router.post('/update', function(req, res, next) {
         nom: req.body.nom,
         prenom: req.body.prenom,
         age: req.body.age,
-        email: req.body.email
+        email: req.body.email,
+        sexe: req.body.sexe,
+        need: req.body.need,
+        bio: req.body.bio,
+        tags_str: "",
+        tags: []
     };
+    if (!item.need)
+        item.need = "Tout le monde m'interesse";
+
+    var str = req.body.tags;
+    var split = str.split(" ");
+    console.log(split);
+    var i = 0;
+    while (split[i]) {
+        split[i] = "#" + split[i];
+        i++;
+    }
+    item.tags = split;
+    item.tags_str = req.body.tags;
     var id = req.body.id;
+
     if (!isNaN(item.age)) {
         if (Number(item.age) >= 18) {
             mongo.connect(url, function (err, db) {
