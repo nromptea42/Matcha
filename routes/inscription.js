@@ -68,38 +68,51 @@ router.post('/insert', function(req, res, next) {
     var mdp = req.body.mdp;
     var mdp2 = req.body.mdp2;
 
-    if (item.nom && item.prenom && item.age && item.email && mdp && mdp2) {
-        if (!isNaN(item.age)) {
-            if (Number(item.age) >= 18) {
-                if (mdp == mdp2) {
-                    if (regex(mdp) == "ok" && mdp.length >= 6) {
-                        item.salt = generateRandomString(20);
-                        var hashed = sha256(mdp + item.salt);
-                        item.mdp = hashed;
-                        mongo.connect(url, function (err, db) {
-                            assert.equal(null, err);
-                            db.collection('user-data').insertOne(item, function (err, result) {
-                                assert.equal(null, err);
-                                console.log('Item inserted');
-                                db.close();
-                            });
-                        });
-                        msg.push("Inscription validée");
+    var i = 0;
+
+    mongo.connect(url, function (err, db) {
+        db.collection('user-data').findOne({email: item.email}).then(function (cursor) {
+            db.close();
+            if (!cursor) {
+                if (item.nom && item.prenom && item.age && item.email && mdp && mdp2) {
+                    if (!isNaN(item.age)) {
+                        if (Number(item.age) >= 18) {
+                            if (mdp == mdp2) {
+                                if (regex(mdp) == "ok" && mdp.length >= 6) {
+                                    item.salt = generateRandomString(20);
+                                    var hashed = sha256(mdp + item.salt);
+                                    item.mdp = hashed;
+
+                                    mongo.connect(url, function (err, db) {
+                                        assert.equal(null, err);
+                                        db.collection('user-data').insertOne(item, function (err, result) {
+                                            assert.equal(null, err);
+                                            i = 1;
+                                            console.log('Item inserted');
+                                            db.close();
+                                        });
+                                    });
+                                    // PAS DE MESSAGE DE VALIDATION !!!!!!
+                                    msg.push("Inscription validée");
+                                }
+                                else
+                                    msg.push("Le mot de passe doit faire au moins 6 caractères et contenir un chiffre");
+                            }
+                            else
+                                msg.push("Les mots de passe doivent etre identiques");
+                        }
+                        else
+                            msg.push("Vous devez etre majeur pour vous inscrire.");
                     }
                     else
-                        msg.push("Le mot de passe doit faire au moins 6 caractères et contenir un chiffre");
+                        msg.push("Votre age doit etre un nombre");
                 }
                 else
-                    msg.push("Les mots de passe doivent etre identiques");
+                    msg.push("Tous les champs doivent etre remplis");
             }
-            else
-                msg.push("Vous devez etre majeur pour vous inscrire.");
-        }
-        else
-            msg.push("Votre age doit etre un nombre");
-    }
-    else
-        msg.push("Tous les champs doivent etre remplis");
+            else msg.push("Email deja utilise");
+        });
+    });
     res.render('inscription', {message: msg});
 });
 
