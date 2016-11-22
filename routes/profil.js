@@ -127,20 +127,38 @@ router.post('/update', function(req, res, next) {
 
 router.post('/add_photo', upload.single('photo'), function(req, res, next) {
     var item = {
-      src_img: ""
+        src_img: req.session.user.src_img,
+        nb_img: 0
     };
     if (req.file) {
-        console.log(req.file);
-        item.src_img = "/" + req.file.path;
-        mongo.connect(url, function (err, db) {
-            assert.equal(null, err);
-            db.collection('user-data').updateOne({"_id": objectId(req.body.id)}, {$set: item}, function (err, result) {
+        var i = req.session.user.nb_img;
+        if (req.body.which) {
+            if (i === 0) {
+                item.src_img[0] = "/" + req.file.path;
+                item.nb_img = 1;
+                // console.log("Je suis 0");
+            }
+            else if (i < 5) {
+                item.src_img.push("/" + req.file.path);
+                item.nb_img = i + 1;
+                // console.log("Je suis autre chose que 0 mais inferieur a 5");
+            }
+            else {
+                var oui = req.body.which;
+                item.src_img[oui - 1] = "/" + req.file.path;
+                item.nb_img = 5;
+                // console.log("Je suis 5");
+            }
+            mongo.connect(url, function (err, db) {
                 assert.equal(null, err);
-                console.log('Item updated');
-                db.close();
+                db.collection('user-data').updateOne({"_id": objectId(req.body.id)}, {$set: item}, function (err, result) {
+                    assert.equal(null, err);
+                    console.log('Item updated');
+                    db.close();
+                });
             });
-        });
-        // console.log(req.file);
+            // console.log(req.file);
+        }
     }
     res.redirect('/profil/' + req.body.id);
 });

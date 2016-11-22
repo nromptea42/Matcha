@@ -54,11 +54,8 @@ router.post('/insert', function(req, res, next) {
         email: req.body.email,
         mdp: "",
         salt: "",
-        src_img: "https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png",
-        src_img_2: "",
-        src_img_3: "",
-        src_img_4: "",
-        src_img_5: "",
+        src_img: ["https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png"],
+        nb_img: 0,
         sexe: "",
         need: "Les deux",
         bio: "",
@@ -92,9 +89,8 @@ router.post('/insert', function(req, res, next) {
                                             db.close();
                                         });
                                     });
-                                    // PAS DE MESSAGE DE VALIDATION !!!!!!
                                     res.render('inscription', {message : "Inscription validée"});
-                                    }
+                                }
                                 else
                                     res.render('inscription', {message : "Le mot de passe doit faire au moins 6 caractères et contenir un chiffre"});
                             }

@@ -1,6 +1,8 @@
 <h1>{{ items.prenom }}</h1>
 
-<img class="photo" src="{{items.src_img}}">
+{{#each items.src_img}}
+<img class="photo" src="{{this}}">
+{{/each}}
 {{#if check }}<br />
     <div>Id: {{ items._id }}</div>
     <div>Nom : {{items.nom}}</div>
@@ -67,6 +69,20 @@
 
     <br />
     <form action="/profil/add_photo" method="post" enctype="multipart/form-data">
+        <div class="input">
+            <label>Photo a changer :</label><br />
+            <input type="radio" id="1" name="which" value="1"/>
+            <label for="1">1</label>
+            <input type="radio" id="2" name="which" value="2" />
+            <label for="2">2</label>
+            <input type="radio" id="3" name="which" value="3" />
+            <label for="3">3</label>
+            <input type="radio" id="4" name="which" value="4" />
+            <label for="4">4</label>
+            <input type="radio" id="5" name="which" value="5" />
+            <label for="5">5</label>
+        </div><br />
+
         <input type="file" name="photo" value="" />
         <input type="hidden" name="id" value="{{items._id}}" />
         <input type="submit" name="submit" value="Publier" />
