@@ -93,27 +93,27 @@ router.post('/insert', function(req, res, next) {
                                         });
                                     });
                                     // PAS DE MESSAGE DE VALIDATION !!!!!!
-                                    msg.push("Inscription validée");
-                                }
+                                    res.render('inscription', {message : "Inscription validée"});
+                                    }
                                 else
-                                    msg.push("Le mot de passe doit faire au moins 6 caractères et contenir un chiffre");
+                                    res.render('inscription', {message : "Le mot de passe doit faire au moins 6 caractères et contenir un chiffre"});
                             }
                             else
-                                msg.push("Les mots de passe doivent etre identiques");
+                                res.render('inscription', {message : "Les mots de passe doivent etre identiques"});
                         }
                         else
-                            msg.push("Vous devez etre majeur pour vous inscrire.");
+                            res.render('inscription', {message : "Vous devez etre majeur pour vous inscrire."});
                     }
                     else
-                        msg.push("Votre age doit etre un nombre");
+                        res.render('inscription', {message : "Votre age doit etre un nombre"});
                 }
                 else
-                    msg.push("Tous les champs doivent etre remplis");
+                    res.render('inscription', {message : "Tous les champs doivent etre remplis"});
             }
-            else msg.push("Email deja utilise");
+            else
+                res.render('inscription', {message: "Email deja utilise"});
         });
     });
-    res.render('inscription', {message: msg});
 });
 
 module.exports = router;
