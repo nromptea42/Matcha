@@ -85,7 +85,49 @@ function sendMail (mail, str, salt) {
 
 /* GET home page. */
 router.get('/', requireLogin, function(req, res, next) {
-        res.render('index');
+    var resultArray = [];
+
+    // console.log(req.session.user);
+    if (req.session.user.sexe) {
+        if (req.session.user.need != 'Les deux') {
+            var need = req.session.user.need;
+            mongo.connect(url, function (err, db) {
+                assert.equal(null, err);
+                var range_min = req.session.user.age - 6;
+                // console.log(range_min);
+                var range_max = Number(req.session.user.age) + 6;
+                // console.log(range_max);
+                var cursor = db.collection('user-data').find({sexe: need,
+                    "age" : { "$gt": String(range_min), "$lt": String(range_max) } }).sort({_id: -1});
+                cursor.forEach(function (doc, err) {
+                    assert.equal(null, err);
+                    if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
+                        resultArray.push(doc);
+                    }
+                }, function () {
+                    db.close();
+                    res.render('index', {items: resultArray});
+                });
+            });
+        }
+        else {
+            mongo.connect(url, function (err, db) {
+                assert.equal(null, err);
+                var cursor = db.collection('user-data').find({need: "Les deux"}).sort({_id: -1});
+                cursor.forEach(function (doc, err) {
+                    assert.equal(null, err);
+                    if (String(doc._id) != String(req.session.user._id)) {
+                        resultArray.push(doc);
+                    }
+                }, function () {
+                    db.close();
+                    res.render('index', {items: resultArray});
+                });
+            });
+        }
+    }
+    else
+        res.render('index', {msg: "Veuillez definir votre sexe pour trouver des gens."});
 });
 
 router.post('/login', function(req, res, next) {

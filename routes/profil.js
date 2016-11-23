@@ -96,7 +96,7 @@ router.post('/update', function(req, res, next) {
         tags: []
     };
     if (!item.need)
-        item.need = "Tout le monde m'interesse";
+        item.need = "Les deux";
 
     var str = req.body.tags;
     var split = str.split(" ");
