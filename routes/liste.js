@@ -14,88 +14,29 @@ function requireLogin (req, res, next) {
     }
 };
 
+var http = require('http');
 
 /* GET home page. */
 router.get('/', requireLogin, function(req, res, next) {
-    var resultArray = [];
-    mongo.connect(url, function (err, db) {
-        assert.equal(null, err);
-        var cursor = db.collection('user-data').find().sort({_id : -1});
-        cursor.forEach(function (doc, err) {
-            assert.equal(null, err);
-            resultArray.push(doc);
-        }, function () {
-            db.close();
-            res.render('liste', {items: resultArray});
-        });
-    });
-});
 
-router.post('/delete', function(req, res, next) {
-    var id = req.body.id;
-
-    mongo.connect(url, function (err, db) {
-        assert.equal(null, err);
-        db.collection('user-data').deleteOne({"_id": objectId(id)}, function (err, result) {
-            assert.equal(null, err);
-            console.log('Item deleted');
-            db.close();
-            res.redirect('/liste');
-        });
-    });
-});
-
-router.get('/profil/:id', function(req, res, next) {
-    mongo.connect(url, function (err, db) {
-        assert.equal(null, err);
-        db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
-            db.close();
-            res.render('profil', {items: cursor, check: true});
-        });
-    });
-});
-
-router.get('/profil/:id/update', function(req, res, next) {
-    mongo.connect(url, function (err, db) {
-        assert.equal(null, err);
-        db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
-            db.close();
-            res.render('profil', {items: cursor, check: false});
-        });
-    });
-});
-
-router.post('/profil', function(req, res, next) {
-    if (req.body.update)
-        var id = req.body.id + "/update";
-    else
-        var id = req.body.id;
-
-    res.redirect('/liste/profil/' + id);
-});
-
-
-router.post('/profil/update', function(req, res, next) {
-    var item = {
-        nom: req.body.nom,
-        prenom: req.body.prenom,
-        age: req.body.age,
-        email: req.body.email
-    };
-    var id = req.body.id;
-    if (!isNaN(item.age)) {
-        if (Number(item.age) >= 18) {
-            mongo.connect(url, function (err, db) {
-                assert.equal(null, err);
-                db.collection('user-data').updateOne({"_id": objectId(id)}, {$set: item}, function (err, result) {
-                    assert.equal(null, err);
-                    console.log('Item updated');
-                    db.close();
+    http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
+        resp.on('data', function(ip) {
+            console.log("My public IP address is: " + ip);
+            http.get({'host': 'freegeoip.net', 'port': 80, 'path': '/json/' + ip}, function(resp) {
+                resp.on('data', function(infos) {
+                    var x = JSON.parse(String(infos));
+                    console.log(x.region_name);
+                    http.get({'host': 'maps.googleapis.com', 'port': 80, 'path': '/maps/api/geocode/json?address=' + x.zip_code}, function(resp) {
+                        resp.on('data', function(maps_infos) {
+                            var y = JSON.parse(String(maps_infos));
+                            console.log(y.results[0].address_components[3].long_name);
+                        });
+                    });
                 });
             });
-        }
-    }
-    res.redirect('/liste/profil/' + id);
+        });
+    });
+    res.render('liste');
 });
 
 module.exports = router;

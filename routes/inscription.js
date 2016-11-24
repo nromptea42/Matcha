@@ -59,7 +59,9 @@ router.post('/insert', function(req, res, next) {
         sexe: "",
         need: "Les deux",
         bio: "",
-        tags: []
+        tags: [],
+        location: "",
+        hidden_location: ""
     };
     var msg = [];
     var mdp = req.body.mdp;

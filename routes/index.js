@@ -127,7 +127,7 @@ router.get('/', requireLogin, function(req, res, next) {
         }
     }
     else
-        res.render('index', {msg: "Veuillez definir votre sexe pour trouver des gens."});
+        res.render('index', {msg: "Veuillez remplir votre profil pour naviguer sur le site."});
 });
 
 router.post('/login', function(req, res, next) {
