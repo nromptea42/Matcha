@@ -49,6 +49,7 @@ function regex_img(value) {
 /* GET home page. */
 router.get('/', requireLogin, function(req, res, next) {
     var id = req.session.user._id;
+    console.log(req.session.user);
     res.redirect('/profil/' + id);
 });
 

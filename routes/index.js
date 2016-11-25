@@ -9,6 +9,7 @@ var sha256 = require('js-sha256');
 var session = require('client-sessions');
 var nodemailer = require('nodemailer');
 var transporter = nodemailer.createTransport();
+var http = require('http');
 
 router.use(function (req, res, next) {
     if (req.session && req.session.user) {
@@ -133,6 +134,9 @@ router.get('/', requireLogin, function(req, res, next) {
 router.post('/login', function(req, res, next) {
     var email = req.body.email;
     var mdp = req.body.mdp;
+    var item = {
+        hidden_location: ""
+    }
 
     if (email && mdp) {
         mongo.connect(url, function (err, db) {
@@ -141,6 +145,26 @@ router.post('/login', function(req, res, next) {
                 if (cursor) {
                     if (cursor.mdp === sha256(mdp + cursor.salt)) {
                         req.session.user = cursor;
+                        http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
+                            resp.on('data', function (ip) {
+                                console.log("My public IP address is: " + ip);
+                                http.get({'host': 'freegeoip.net', 'port': 80, 'path': '/json/' + ip}, function (resp) {
+                                    resp.on('data', function (infos) {
+                                        var x = JSON.parse(infos);
+                                        console.log(x);
+                                        item.hidden_location = x.region_name;
+                                        mongo.connect(url, function (err, db) {
+                                            assert.equal(null, err);
+                                            db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)}, {$set: item}, function (err, result) {
+                                                assert.equal(null, err);
+                                                console.log('Item updated');
+                                                db.close();
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
                         res.redirect('/');
                     } else {
                         res.redirect('/');
