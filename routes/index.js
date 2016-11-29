@@ -98,8 +98,14 @@ router.get('/', requireLogin, function(req, res, next) {
                 // console.log(range_min);
                 var range_max = Number(req.session.user.age) + 6;
                 // console.log(range_max);
+                var where;
+                if (req.session.user.location)
+                    where = req.session.user.location;
+                else
+                    where = req.session.user.hidden_location;
+
                 var cursor = db.collection('user-data').find({sexe: need,
-                    "age" : { "$gt": String(range_min), "$lt": String(range_max) } }).sort({_id: -1});
+                    "age" : { "$gt": String(range_min), "$lt": String(range_max) }, "location" : where }).sort({_id: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
                     if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
@@ -107,7 +113,10 @@ router.get('/', requireLogin, function(req, res, next) {
                     }
                 }, function () {
                     db.close();
-                    res.render('index', {items: resultArray});
+                    if (!resultArray[0])
+                        res.render('index', {msg: "Je n'ai trouve personne pour vous :("});
+                    else
+                        res.render('index', {items: resultArray});
                 });
             });
         }
@@ -122,7 +131,10 @@ router.get('/', requireLogin, function(req, res, next) {
                     }
                 }, function () {
                     db.close();
-                    res.render('index', {items: resultArray});
+                    if (!resultArray[0])
+                        res.render('index', {msg: "Je n'ai trouve personne pour vous :("});
+                    else
+                        res.render('index', {items: resultArray});
                 });
             });
         }

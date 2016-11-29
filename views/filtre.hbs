@@ -1,0 +1,43 @@
+<h4>Filter par age</h4><br />
+<form action="/filtre/age" method="post">
+    <div class="input">
+        <label for="age_min">Age minimum</label>
+        <input type="text" id="age_min" name="age_min">
+    </div>
+    <div class="input">
+        <label for="age_max">Age maximum</label>
+        <input type="text" id="age_max" name="age_max">
+    </div>
+    <input type="submit" name="submit" value="Filter par age" />
+</form><br />
+
+<h4>Filter par region</h4>
+<form action="/filtre/region" method="post">
+    <div class="input">
+        <label for="zip">Code postal</label>
+        <input type="text" id="zip" name="zip">
+    </div>
+    <input type="submit" name="submit" value="Filter par region" />
+</form><br />
+
+<h4>Filter par popularité</h4>
+<form action="/filtre/popularite" method="post">
+    <div class="input">
+        <label for="popu_min">Popularité minimum</label>
+        <input type="text" id="popu_min" name="popu_min">
+    </div>
+    <div class="input">
+        <label for="popu_max">Popularité maximum</label>
+        <input type="text" id="popu_max" name="popu_max">
+    </div>
+    <input type="submit" name="submit" value="Filter par popularite" />
+</form><br />
+
+<h4>Filter par tags</h4>
+<form action="/filtre/tags" method="post">
+    <div class="input">
+        <label for="tags">Tags</label>
+        <input type="text" id="tags" name="tags">
+    </div>
+    <input type="submit" name="submit" value="Filter par tags" />
+</form><br />

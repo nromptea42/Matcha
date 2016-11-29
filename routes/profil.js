@@ -5,6 +5,7 @@ var objectId = require('mongodb').ObjectID;
 var assert = require('assert');
 
 var url = "mongodb://localhost:27017/test";
+var http = require('http');
 
 var multer  = require('multer');
 var storage =  multer.diskStorage({
@@ -94,7 +95,9 @@ router.post('/update', function(req, res, next) {
         need: req.body.need,
         bio: req.body.bio,
         tags_str: "",
-        tags: []
+        tags: [],
+        zip_code: "",
+        location: ""
     };
     if (!item.need)
         item.need = "Les deux";
@@ -110,20 +113,32 @@ router.post('/update', function(req, res, next) {
     item.tags = split;
     item.tags_str = req.body.tags;
     var id = req.body.id;
+    item.zip_code = req.body.location;
 
-    if (!isNaN(item.age)) {
-        if (Number(item.age) >= 18) {
-            mongo.connect(url, function (err, db) {
-                assert.equal(null, err);
-                db.collection('user-data').updateOne({"_id": objectId(id)}, {$set: item}, function (err, result) {
-                    assert.equal(null, err);
-                    console.log('Item updated');
-                    db.close();
-                });
-            });
-        }
-    }
-    res.redirect('/profil/' + id);
+    http.get({'host': 'maps.googleapis.com',
+        'path': '/maps/api/geocode/json?address=' + item.zip_code + ",%20France"}, function(resp) {
+        resp.on('data', function(maps_infos) {
+            var y = JSON.parse(maps_infos);
+            // console.log(y);
+            // console.log(y.results[0].address_components[3].long_name);
+            if (item.zip_code)
+                item.location = y.results[0].address_components[3].long_name;
+
+            if (!isNaN(item.age)) {
+                if (Number(item.age) >= 18) {
+                    mongo.connect(url, function (err, db) {
+                        assert.equal(null, err);
+                        db.collection('user-data').updateOne({"_id": objectId(id)}, {$set: item}, function (err, result) {
+                            assert.equal(null, err);
+                            console.log('Item updated');
+                            db.close();
+                        });
+                    });
+                }
+            }
+            res.redirect('/profil/' + id);
+        });
+    });
 });
 
 router.post('/add_photo', upload.single('photo'), function(req, res, next) {

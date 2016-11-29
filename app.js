@@ -10,6 +10,7 @@ var inscription = require('./routes/inscription');
 var liste = require('./routes/liste');
 var logout = require('./routes/logout');
 var profil = require('./routes/profil');
+var filtre = require('./routes/filtre');
 
 var session = require('client-sessions');
 var app = express();
@@ -29,7 +30,7 @@ app.use(session({
   cookieName: 'session',
   secret: 'ptdr jrigole hehe',
   duration: 60 * 60 * 1000,
-  activeDuration: 10 * 60 * 1000,
+  activeDuration: 10 * 60 * 1000
 }));
 
 app.use('/', routes);
@@ -37,6 +38,7 @@ app.use('/inscription', inscription);
 app.use('/liste', liste);
 app.use('/logout', logout);
 app.use('/profil', profil);
+app.use('/filtre', filtre);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -21,3 +21,11 @@ dans LIEN.js : router.get('LIEN', function(req, res, next) {
                });
 
 http://maps.googleapis.com/maps/api/geocode/json?address=93300
+
+
+<form action="/filtre/test" method="post">
+    {{#each items }}
+        <input type="hidden" name="oui" value="{{{this._id}}}">
+    {{/each}}
+    <button type="submit">Oui</button>
+</form>

@@ -60,6 +60,7 @@ router.post('/insert', function(req, res, next) {
         need: "Les deux",
         bio: "",
         tags: [],
+        zip_code: "",
         location: "",
         hidden_location: ""
     };
