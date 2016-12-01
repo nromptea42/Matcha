@@ -11,6 +11,7 @@ var liste = require('./routes/liste');
 var logout = require('./routes/logout');
 var profil = require('./routes/profil');
 var filtre = require('./routes/filtre');
+var tri = require('./routes/tri');
 
 var session = require('client-sessions');
 var app = express();
@@ -39,6 +40,7 @@ app.use('/liste', liste);
 app.use('/logout', logout);
 app.use('/profil', profil);
 app.use('/filtre', filtre);
+app.use('/tri', tri);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

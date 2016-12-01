@@ -114,9 +114,9 @@ router.get('/', requireLogin, function(req, res, next) {
                 }, function () {
                     db.close();
                     if (!resultArray[0])
-                        res.render('index', {msg: "Je n'ai trouve personne pour vous :("});
+                        res.render('index', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                     else
-                        res.render('index', {items: resultArray});
+                        res.render('index', {items: resultArray, which: "index"});
                 });
             });
         }

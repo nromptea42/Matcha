@@ -2,6 +2,10 @@
     <div>
         <div class="row"><br />
             <a href="/filtre">Filtrer</a><br />
+            <form action="/tri/age" method="post">
+                <input type="hidden" name="which" value="{{which}}">
+                <button type="submit">Trier par age</button>
+            </form>
             {{ msg }}
             {{# each items }}
                 <div class="col s12 m6">
