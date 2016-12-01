@@ -130,7 +130,7 @@ router.post('/age', function(req, res, next) {
         get_age(req, res, array[1], array[2]);
     }
     else if (array[0] == "tags") {
-
+        get_tags(req, res);
     }
 });
 
