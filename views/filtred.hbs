@@ -6,6 +6,10 @@
                 <input type="hidden" name="which" value="{{which}}">
                 <button type="submit">Trier par age</button>
             </form>
+            <form action="/tri/tags" method="post">
+                <input type="hidden" name="which" value="{{which}}">
+                <button type="submit">Trier par tags en commun</button>
+            </form>
             {{ msg }}
             {{# each items }}
                 <div class="col s12 m6">

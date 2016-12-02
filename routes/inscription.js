@@ -59,6 +59,7 @@ router.post('/insert', function(req, res, next) {
         sexe: "",
         need: "Les deux",
         bio: "",
+        tags_str: "",
         tags: [],
         zip_code: "",
         location: "",

@@ -214,7 +214,7 @@ router.post('/tags', function(req, res, next) {
             if (!resultArray[0])
                 res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
             else
-                res.render('filtred', {items: newTab, maybe: newTab2, which: "tags"});
+                res.render('filtred', {items: newTab, maybe: newTab2, which: "tags " + req.body.tags});
         });
     });
 });
