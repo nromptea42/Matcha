@@ -282,10 +282,88 @@ function tags_sort (req, res, sort, age_min, age_max, yes) {
     });
 }
 
+function do_bad_things (req, res, str) {
+    // console.log(req.body.tags);
+    splited = str.split(" ");
+    // var i = 0;
+    // while (splited[i])
+    //     console.log(splited[i++]);
+    // console.log(req.session.user.tags_str.split(" "));
+
+    var resultArray = [];
+
+    mongo.connect(url, function (err, db) {
+        assert.equal(null, err);
+
+        var cursor = db.collection('user-data').find({
+            sexe: req.session.user.need}).sort({_id: -1});
+        cursor.forEach(function (doc, err) {
+            assert.equal(null, err);
+            if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
+                var i = 0;
+                var nb = 0;
+                var tag_split = doc.tags_str.split(" ");
+                // console.log(tag_split);
+                while (splited[i]) {
+                    var j = 0;
+                    while (tag_split[j])
+                    {
+                        // console.log(tag_split[j]);
+                        if (splited[i] == tag_split[j])
+                            nb++;
+                        j++;
+                    }
+                    i++;
+                }
+                var item = {
+                    nb_match: nb,
+                    user: doc
+                };
+                resultArray.push(item);
+            }
+        }, function () {
+            db.close();
+            len = resultArray.length;
+            var tmp;
+
+            while (len - 1 > 0) {
+                var k = 0;
+                while (resultArray[k + 1]) {
+                    if (resultArray[k].nb_match < resultArray[k + 1].nb_match) {
+                        tmp = resultArray[k];
+                        resultArray[k] = resultArray[k + 1];
+                        resultArray[k + 1] = tmp;
+                    }
+                    k++;
+                }
+                len--;
+            }
+
+            var i = 0;
+            var newTab = [];
+            var newTab2 = [];
+            while (resultArray[i] && resultArray[i].nb_match > 0) {
+                newTab[i] = resultArray[i].user;
+                i++;
+            }
+            while (resultArray[i]) {
+                newTab2[i] = resultArray[i].user;
+                i++;
+            }
+            // console.log(newTab);
+            // console.log(newTab2);
+
+            if (!resultArray[0])
+                res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
+            else
+                res.render('filtred', {items: newTab, maybe: newTab2, which: "tags " + str});
+        });
+    });
+}
 
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', requireLogin, function(req, res, next) {
     res.render('filtre');
 });
 
@@ -345,7 +423,7 @@ router.post('/tags', function(req, res, next) {
                 str = str + array[i] + " ";
             i++;
         }
-        tags_sort(req, res, sort, 18, 99, "tags " + str);
+        do_bad_things(req, res, str);
     }
     else
         res.redirect('/');

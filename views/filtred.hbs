@@ -2,6 +2,7 @@
     <div>
         <div class="row"><br />
             <a href="/filtre">Filtrer</a><br />
+            <a href="/recherche">Rechercher</a>
             <form action="/tri/age" method="post">
                 <input type="hidden" name="which" value="{{which}}">
                 <button type="submit">Trier par age</button>
@@ -9,6 +10,9 @@
             <form action="/tri/tags" method="post">
                 <input type="hidden" name="which" value="{{which}}">
                 <button type="submit">Trier par tags en commun</button>
+            </form>
+            <form onsubmit="return false;">
+                <input type="submit" value="Trier par localisation">
             </form>
             {{ msg }}
             {{# each items }}
