@@ -21,7 +21,9 @@
                         <div class="card-content white-text">
                             <span class="card-title">{{ this.prenom }} {{ this.nom }}</span>
                             <p>Sexe : {{ this.sexe }}</p>
+                            <p>Recherche : {{ this.need}}</p>
                             <p>Age : {{ this.age }}</p>
+                            <p>Tags : {{this.tags}}</p>
                             <p>id : {{ this._id }}</p>
                         </div>
                         <form action="/liste/delete" method="post" style="text-align: center;">

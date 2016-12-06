@@ -90,22 +90,21 @@ router.get('/', requireLogin, function(req, res, next) {
 
     // console.log(req.session.user);
     if (req.session.user.sexe) {
+        var need = req.session.user.need;
+        var range_min = req.session.user.age - 6;
+        // console.log(range_min);
+        var range_max = Number(req.session.user.age) + 6;
+        // console.log(range_max);
+        var where;
+        if (req.session.user.location)
+            where = req.session.user.location;
+        else
+            where = req.session.user.hidden_location;
+
         if (req.session.user.need != 'Les deux') {
-            var need = req.session.user.need;
             mongo.connect(url, function (err, db) {
                 assert.equal(null, err);
-                var range_min = req.session.user.age - 6;
-                // console.log(range_min);
-                var range_max = Number(req.session.user.age) + 6;
-                // console.log(range_max);
-                var where;
-                if (req.session.user.location)
-                    where = req.session.user.location;
-                else
-                    where = req.session.user.hidden_location;
-
-                var cursor = db.collection('user-data').find({sexe: need,
-                    "age" : { "$gt": String(range_min), "$lt": String(range_max) }, "location" : where }).sort({_id: -1});
+                var cursor = db.collection('user-data').find({sexe: need, "location" : where }).sort({_id: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
                     if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
@@ -123,7 +122,8 @@ router.get('/', requireLogin, function(req, res, next) {
         else {
             mongo.connect(url, function (err, db) {
                 assert.equal(null, err);
-                var cursor = db.collection('user-data').find({need: "Les deux"}).sort({_id: -1});
+                console.log(where);
+                var cursor = db.collection('user-data').find({"need" : {$in: ["Les deux", req.session.user.sexe]}, "location": where }).sort({_id: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
                     if (String(doc._id) != String(req.session.user._id)) {
@@ -134,7 +134,7 @@ router.get('/', requireLogin, function(req, res, next) {
                     if (!resultArray[0])
                         res.render('index', {msg: "Je n'ai trouve personne pour vous :("});
                     else
-                        res.render('index', {items: resultArray});
+                        res.render('index', {items: resultArray, which: "index"});
                 });
             });
         }
