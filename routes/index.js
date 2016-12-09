@@ -91,26 +91,20 @@ router.get('/', requireLogin, function(req, res, next) {
     // console.log(req.session.user);
     if (req.session.user.sexe) {
         var need = req.session.user.need;
-        if (req.session.user.location.coordinates[0] && req.session.user.location.coordinates[1])
-            where = req.session.user.location.coordinates;
-        else
-            where = req.session.user.hidden_loc.coordinates;
-
         if (req.session.user.need != 'Les deux') {
             mongo.connect(url, function (err, db) {
                 assert.equal(null, err);
                 var cursor = db.collection('user-data').find({
-                    sexe : need,
+                    "sexe" : need,
                     "location": { $near: { $geometry:
                         {
                             type:"Point",
-                            coordinates:[where[0], where[1]]
+                            coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
                         },
                         $maxDistance:5000}}
                 }).sort({_id: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
-                    console.log("oui");
                     if (String(doc._id) != String(req.session.user._id)) {
                         resultArray.push(doc);
                     }
@@ -126,13 +120,12 @@ router.get('/', requireLogin, function(req, res, next) {
         else {
             mongo.connect(url, function (err, db) {
                 assert.equal(null, err);
-                console.log(where);
                 var cursor = db.collection('user-data').find({
                     "need" : {$in: ["Les deux", req.session.user.sexe]},
                     "location": { $near: { $geometry:
                         {
                             type:"Point",
-                            coordinates:[where[0], where[1]]
+                            coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
                         },
                         $maxDistance:5000}}
                 }).sort({_id: -1});
@@ -159,11 +152,12 @@ router.post('/login', function(req, res, next) {
     var email = req.body.email;
     var mdp = req.body.mdp;
     var item = {
-        location: { type: "Point", coordinates: [Number(req.body.long), Number(req.body.lat)] },
-        hidden_loc: { coordinates: [] }
+        location: { type: "Point", coordinates: [] }
     };
 
     if (email && mdp) {
+        if (req.body.long != "none" && req.body.lat != "none")
+            item.location.coordinates = [Number(req.body.long), Number(req.body.lat)];
         mongo.connect(url, function (err, db) {
             db.collection('user-data').findOne({email: email}).then(function (cursor) {
                 db.close();
@@ -176,8 +170,11 @@ router.post('/login', function(req, res, next) {
                                 http.get({'host': 'freegeoip.net', 'port': 80, 'path': '/json/' + ip}, function (resp) {
                                     resp.on('data', function (infos) {
                                         var x = JSON.parse(infos);
-                                        console.log(x);
-                                        item.hidden_loc.coordinates = [x.longitude, x.latitude];
+                                        // console.log(x);
+                                        if (req.body.long != "none" && req.body.lat != "none")
+                                            item.location.coordinates = [Number(req.body.long), Number(req.body.lat)];
+                                        else
+                                            item.location.coordinates = [Number(x.longitude), Number(x.latitude)];
                                         mongo.connect(url, function (err, db) {
                                             assert.equal(null, err);
                                             db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)}, {$set: item}, function (err, result) {

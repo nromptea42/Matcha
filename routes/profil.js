@@ -96,7 +96,8 @@ router.post('/update', function(req, res, next) {
         bio: req.body.bio,
         tags_str: "",
         tags: [],
-        zip_code: "",
+        ville: "",
+        location: { type: "Point", coordinates: [] }
     };
     if (!item.need)
         item.need = "Les deux";
@@ -112,16 +113,18 @@ router.post('/update', function(req, res, next) {
     item.tags = split;
     item.tags_str = req.body.tags;
     var id = req.body.id;
-    item.zip_code = req.body.location;
+    item.ville = req.body.location;
 
     http.get({'host': 'maps.googleapis.com',
-        'path': '/maps/api/geocode/json?address=' + item.zip_code + ",%20France"}, function(resp) {
+        'path': '/maps/api/geocode/json?address=' + item.ville + ",%20France"}, function(resp) {
         resp.on('data', function(maps_infos) {
             var y = JSON.parse(maps_infos);
             // console.log(y);
-            console.log(y.results[0].address_components);//[3].long_name);
-            if (item.zip_code)
-                item.location = y.results[0].address_components[3].long_name;
+            console.log(y.results[0].address_components[0].long_name);
+            if (req.body.location) {
+                item.ville = y.results[0].address_components[0].long_name;
+                item.location.coordinates = [Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
+            }
 
             if (!isNaN(item.age)) {
                 if (Number(item.age) >= 18) {

@@ -62,8 +62,7 @@ router.post('/insert', function(req, res, next) {
         bio: "",
         tags_str: "",
         tags: [],
-        zip_code: "",
-        hidden_loc: { "type": "Point", "coordinates": [2, 48] }
+        ville: ""
     };
     var msg = [];
     var mdp = req.body.mdp;

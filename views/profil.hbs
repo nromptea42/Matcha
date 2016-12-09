@@ -10,7 +10,7 @@
     <div>Age : {{items.age }}</div>
     <div>Sexe : {{items.sexe}}</div>
     <div>Je recherche : {{items.need}}</div>
-    <div>Habite en : {{items.location}}</div>
+    <div>Habite a : {{items.ville}}</div>
     <div>Description : {{items.bio}}</div>
     <div>Tags :
     {{# each items.tags }}
@@ -57,8 +57,8 @@
             <label for="need3">Les deux</label>
         </div><br />
         <div class="input">
-            <label>Code postal :</label><br />
-            <input type="text" id="location" name="location" value="{{items.zip_code}}">
+            <label>Habite a :</label><br />
+            <input type="text" id="location" name="location" value="{{items.ville}}">
         </div>
         <div class="input">
             <label for="bio">Description</label>
