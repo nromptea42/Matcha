@@ -48,6 +48,7 @@ router.get('/', requireNonLogin, function(req, res, next) {
 
 router.post('/insert', function(req, res, next) {
     var item = {
+        location: { "type": "Point", "coordinates": [2, 48] },
         nom: req.body.nom,
         prenom: req.body.prenom,
         age: req.body.age,
@@ -62,8 +63,7 @@ router.post('/insert', function(req, res, next) {
         tags_str: "",
         tags: [],
         zip_code: "",
-        location: "",
-        hidden_location: ""
+        hidden_loc: { "type": "Point", "coordinates": [2, 48] }
     };
     var msg = [];
     var mdp = req.body.mdp;

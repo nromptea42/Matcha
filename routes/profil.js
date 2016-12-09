@@ -97,7 +97,6 @@ router.post('/update', function(req, res, next) {
         tags_str: "",
         tags: [],
         zip_code: "",
-        location: ""
     };
     if (!item.need)
         item.need = "Les deux";
@@ -120,7 +119,7 @@ router.post('/update', function(req, res, next) {
         resp.on('data', function(maps_infos) {
             var y = JSON.parse(maps_infos);
             // console.log(y);
-            // console.log(y.results[0].address_components[3].long_name);
+            console.log(y.results[0].address_components);//[3].long_name);
             if (item.zip_code)
                 item.location = y.results[0].address_components[3].long_name;
 

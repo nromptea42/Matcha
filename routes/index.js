@@ -91,23 +91,27 @@ router.get('/', requireLogin, function(req, res, next) {
     // console.log(req.session.user);
     if (req.session.user.sexe) {
         var need = req.session.user.need;
-        var range_min = req.session.user.age - 6;
-        // console.log(range_min);
-        var range_max = Number(req.session.user.age) + 6;
-        // console.log(range_max);
-        var where;
-        if (req.session.user.location)
-            where = req.session.user.location;
+        if (req.session.user.location.coordinates[0] && req.session.user.location.coordinates[1])
+            where = req.session.user.location.coordinates;
         else
-            where = req.session.user.hidden_location;
+            where = req.session.user.hidden_loc.coordinates;
 
         if (req.session.user.need != 'Les deux') {
             mongo.connect(url, function (err, db) {
                 assert.equal(null, err);
-                var cursor = db.collection('user-data').find({sexe: need, "location" : where }).sort({_id: -1});
+                var cursor = db.collection('user-data').find({
+                    sexe : need,
+                    "location": { $near: { $geometry:
+                        {
+                            type:"Point",
+                            coordinates:[where[0], where[1]]
+                        },
+                        $maxDistance:5000}}
+                }).sort({_id: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
-                    if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
+                    console.log("oui");
+                    if (String(doc._id) != String(req.session.user._id)) {
                         resultArray.push(doc);
                     }
                 }, function () {
@@ -123,7 +127,15 @@ router.get('/', requireLogin, function(req, res, next) {
             mongo.connect(url, function (err, db) {
                 assert.equal(null, err);
                 console.log(where);
-                var cursor = db.collection('user-data').find({"need" : {$in: ["Les deux", req.session.user.sexe]}, "location": where }).sort({_id: -1});
+                var cursor = db.collection('user-data').find({
+                    "need" : {$in: ["Les deux", req.session.user.sexe]},
+                    "location": { $near: { $geometry:
+                        {
+                            type:"Point",
+                            coordinates:[where[0], where[1]]
+                        },
+                        $maxDistance:5000}}
+                }).sort({_id: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
                     if (String(doc._id) != String(req.session.user._id)) {
@@ -132,7 +144,7 @@ router.get('/', requireLogin, function(req, res, next) {
                 }, function () {
                     db.close();
                     if (!resultArray[0])
-                        res.render('index', {msg: "Je n'ai trouve personne pour vous :("});
+                        res.render('index', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                     else
                         res.render('index', {items: resultArray, which: "index"});
                 });
@@ -147,8 +159,9 @@ router.post('/login', function(req, res, next) {
     var email = req.body.email;
     var mdp = req.body.mdp;
     var item = {
-        hidden_location: ""
-    }
+        location: { type: "Point", coordinates: [Number(req.body.long), Number(req.body.lat)] },
+        hidden_loc: { coordinates: [] }
+    };
 
     if (email && mdp) {
         mongo.connect(url, function (err, db) {
@@ -159,12 +172,12 @@ router.post('/login', function(req, res, next) {
                         req.session.user = cursor;
                         http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
                             resp.on('data', function (ip) {
-                                console.log("My public IP address is: " + ip);
+                                // console.log("My public IP address is: " + ip);
                                 http.get({'host': 'freegeoip.net', 'port': 80, 'path': '/json/' + ip}, function (resp) {
                                     resp.on('data', function (infos) {
                                         var x = JSON.parse(infos);
                                         console.log(x);
-                                        item.hidden_location = x.region_name;
+                                        item.hidden_loc.coordinates = [x.longitude, x.latitude];
                                         mongo.connect(url, function (err, db) {
                                             assert.equal(null, err);
                                             db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)}, {$set: item}, function (err, result) {

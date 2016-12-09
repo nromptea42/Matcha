@@ -1,8 +1,38 @@
-<form action="/login" method="post" style="margin-top: 200px;">
+<form action="/login" id="formID" method="post" style="margin-top: 200px;">
     <input type="text" name="email" autofocus required placeholder="Email"><br />
     <input type="password" name="mdp" required placeholder="Mot de passe">
-    <button class="btn btn-primary" type="submit">Login</button>
+    <input type="hidden" id="lat" name="lat" value="none">
+    <input type="hidden" id="long" name="long" value="none">
+    <input type="submit" id="submitNew2" class="btn btn-primary"  value="Login">
 </form>
 <br />
 Pas de compte ? <a href="/inscription">Inscrivez vous !</a><br />
 Vous avez oublié votre mot de passe ? <a href="/forgot">Recuperez le !</a>
+
+<script>
+    window.onload = function() {
+        getLocation();
+        document.getElementById("formID").onsubmit = function() {
+            var form = this;
+            document.getElementById("submitNew2").value = "Loading...";
+            setTimeout(function() {
+                form.submit();
+            }, 3000); // 3 seconds
+            return false;
+        };
+
+    };
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            console.log("Geolocation is not supported by this browser.");
+        }
+    }
+    function showPosition(position) {
+        console.log(position.coords.latitude);
+        console.log(position.coords.longitude);
+        document.getElementById("lat").value = position.coords.latitude;
+        document.getElementById("long").value = position.coords.longitude;
+    }
+</script>
