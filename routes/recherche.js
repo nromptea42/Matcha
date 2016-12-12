@@ -42,8 +42,8 @@ router.post('/things', requireLogin, function(req, res, next) {
     if (!req.body.age_min || !req.body.age_max || !req.body.zip || !req.body.popu_min || !req.body.popu_max|| !req.body.tags)
         res.render('recherche', {msg: "Tous les champs doivent etre rempli"});
     else {
-        if (Number.isInteger(Number(req.body.age_min)) && Number.isInteger(Number(req.body.age_max)) &&
-            Number.isInteger(Number(req.body.zip)) && Number.isInteger(Number(req.body.popu_min)) &&
+        if (Number.isInteger(Number(req.body.age_min)) && Number.isInteger(Number(req.body.age_max))
+            && Number.isInteger(Number(req.body.popu_min)) &&
             Number.isInteger(Number(req.body.popu_max))) {
             if (req.body.age_min <= req.body.age_max) {
                 mongo.connect(url, function (err, db) {
@@ -54,16 +54,18 @@ router.post('/things', requireLogin, function(req, res, next) {
                         'path': '/maps/api/geocode/json?address=' + req.body.zip + ",%20France"}, function (resp) {
                         resp.on('data', function (maps_infos) {
                             var y = JSON.parse(maps_infos);
-                            // console.log(y);
-                            // console.log(y.results[0].address_components[3].long_name);
-                            where = y.results[0].address_components[3].long_name;
                             var splited = req.body.tags.split(" ");
                             var resultArray = [];
                             var cursor = db.collection('user-data').find({
                                 sexe: req.session.user.need,
                                 "age": {"$gte": String(req.body.age_min), "$lte": String(req.body.age_max)},
                                 // "popu"
-                                "location": where
+                                "location": { $near: { $geometry:
+                                {
+                                    type:"Point",
+                                    coordinates:[Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
+                                },
+                                    $maxDistance:30000}}
                             }).sort({_id: -1});
                             cursor.forEach(function (doc, err) {
                                 assert.equal(null, err);
@@ -121,10 +123,10 @@ router.post('/things', requireLogin, function(req, res, next) {
                                 // console.log(newTab);
                                 // console.log(newTab2);
 
-                                if (!resultArray[0])
+                                if (!newTab[0])
                                     res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                                 else
-                                    res.render('filtred', {items: newTab, maybe: newTab2, which: "tags " + req.body.tags});
+                                    res.render('filtred', {items: newTab, which: "tags " + req.body.tags}); // TODO: JE PEUX PAS TRIER LOL
                             });
                         });
                     });

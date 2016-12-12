@@ -101,7 +101,7 @@ router.get('/', requireLogin, function(req, res, next) {
                             type:"Point",
                             coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
                         },
-                        $maxDistance:5000}}
+                        $maxDistance:30000}}
                 }).sort({_id: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
@@ -127,7 +127,7 @@ router.get('/', requireLogin, function(req, res, next) {
                             type:"Point",
                             coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
                         },
-                        $maxDistance:5000}}
+                        $maxDistance:30000}}
                 }).sort({_id: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
@@ -152,7 +152,8 @@ router.post('/login', function(req, res, next) {
     var email = req.body.email;
     var mdp = req.body.mdp;
     var item = {
-        location: { type: "Point", coordinates: [] }
+        location: { type: "Point", coordinates: [] },
+        ville: ""
     };
 
     if (email && mdp) {
@@ -164,29 +165,35 @@ router.post('/login', function(req, res, next) {
                 if (cursor) {
                     if (cursor.mdp === sha256(mdp + cursor.salt)) {
                         req.session.user = cursor;
-                        http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
-                            resp.on('data', function (ip) {
-                                // console.log("My public IP address is: " + ip);
-                                http.get({'host': 'freegeoip.net', 'port': 80, 'path': '/json/' + ip}, function (resp) {
-                                    resp.on('data', function (infos) {
-                                        var x = JSON.parse(infos);
-                                        // console.log(x);
-                                        if (req.body.long != "none" && req.body.lat != "none")
-                                            item.location.coordinates = [Number(req.body.long), Number(req.body.lat)];
-                                        else
-                                            item.location.coordinates = [Number(x.longitude), Number(x.latitude)];
-                                        mongo.connect(url, function (err, db) {
-                                            assert.equal(null, err);
-                                            db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)}, {$set: item}, function (err, result) {
+                        if (!cursor.ville) {
+                            http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function (resp) {
+                                resp.on('data', function (ip) {
+                                    // console.log("My public IP address is: " + ip);
+                                    http.get({
+                                        'host': 'freegeoip.net',
+                                        'port': 80,
+                                        'path': '/json/' + ip
+                                    }, function (resp) {
+                                        resp.on('data', function (infos) {
+                                            var x = JSON.parse(infos);
+                                            console.log(x);
+                                            if (req.body.long != "none" && req.body.lat != "none")
+                                                item.location.coordinates = [Number(req.body.long), Number(req.body.lat)];
+                                            else
+                                                item.location.coordinates = [Number(x.longitude), Number(x.latitude)];
+                                            mongo.connect(url, function (err, db) {
                                                 assert.equal(null, err);
-                                                console.log('Item updated');
-                                                db.close();
+                                                db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)}, {$set: item}, function (err, result) {
+                                                    assert.equal(null, err);
+                                                    console.log('Item updated');
+                                                    db.close();
+                                                });
                                             });
                                         });
                                     });
                                 });
                             });
-                        });
+                        }
                         res.redirect('/');
                     } else {
                         res.redirect('/');

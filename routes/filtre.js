@@ -44,10 +44,7 @@ router.post('/age', function(req, res, next) {
     var where;
     var resultArray = [];
     var resultArray2 = [];
-    if (req.session.user.location)
-        where = req.session.user.location;
-    else
-        where = req.session.user.hidden_location;
+
     if (req.body.age_min <= req.body.age_max) {
         if (req.session.user.need != "Les deux") {
             mongo.connect(url, function (err, db) {
@@ -55,7 +52,13 @@ router.post('/age', function(req, res, next) {
 
                 var cursor = db.collection('user-data').find({
                     sexe: req.session.user.need,
-                    "age": {"$gte": String(req.body.age_min), "$lte": String(req.body.age_max)}, "location": where
+                    "age": {"$gte": String(req.body.age_min), "$lte": String(req.body.age_max)},
+                    "location": { $near: { $geometry:
+                    {
+                        type:"Point",
+                        coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                    },
+                        $maxDistance:30000}}
                 }).sort({_id: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
@@ -63,40 +66,30 @@ router.post('/age', function(req, res, next) {
                         resultArray.push(doc);
                     }
                 }, function () {
-                    var cursor = db.collection('user-data').find({
-                        sexe: req.session.user.need,
-                        "age": {"$gte": String(req.body.age_min), "$lte": String(req.body.age_max)},
-                        "location": {$ne: where}
-                    })
-                        .sort({_id: -1});
-                    cursor.forEach(function (doc, err) {
-                        assert.equal(null, err);
-                        if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
-                            resultArray2.push(doc);
-                        }
-                    }, function () {
                         db.close();
-                        if (!resultArray[0] && !resultArray2[0])
+                        if (!resultArray[0])
                             res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                         else
                             res.render('filtred', {
                                 items: resultArray,
-                                maybe: resultArray2,
                                 which: "age " + req.body.age_min + " " + req.body.age_max
                             });
                     });
                 });
-            });
         }
         else {
-            console.log("oui");
             mongo.connect(url, function (err, db) {
                 assert.equal(null, err);
 
                 var cursor = db.collection('user-data').find({
                     "need" : {$in: ["Les deux", req.session.user.sexe]},
                     "age": {"$gte": String(req.body.age_min), "$lte": String(req.body.age_max)},
-                    "location": where
+                    "location": { $near: { $geometry:
+                    {
+                        type:"Point",
+                        coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                    },
+                        $maxDistance:30000}}
                 }).sort({_id: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
@@ -104,25 +97,13 @@ router.post('/age', function(req, res, next) {
                         resultArray.push(doc);
                     }
                 }, function () {
-                    var cursor = db.collection('user-data').find({
-                        "need" : {$in: ["Les deux", req.session.user.sexe]},
-                        "age": {"$gte": String(req.body.age_min), "$lte": String(req.body.age_max)},
-                        "location": {$ne: where}
-                    }).sort({_id: -1});
-                    cursor.forEach(function (doc, err) {
-                        assert.equal(null, err);
-                        if (String(doc._id) != String(req.session.user._id)) {
-                            resultArray2.push(doc);
-                        }
-                    }, function () {
                         db.close();
-                        if (!resultArray[0] && !resultArray2[0])
+                        if (!resultArray[0])
                             res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                         else
-                            res.render('filtred', {items: resultArray, maybe: resultArray2, which: "age " + req.body.age_min + " " + req.body.age_max });
+                            res.render('filtred', {items: resultArray, which: "age " + req.body.age_min + " " + req.body.age_max });
                     });
                 });
-            });
         }
 
     }
@@ -132,9 +113,7 @@ router.post('/age', function(req, res, next) {
 
 router.post('/region', function(req, res, next) {
     console.log(req.body.zip);
-    var where;
     var resultArray = [];
-    var resultArray2 = [];
 
     if (req.session.user.need != "Les deux") {
         mongo.connect(url, function (err, db) {
@@ -147,11 +126,16 @@ router.post('/region', function(req, res, next) {
                 resp.on('data', function (maps_infos) {
                     var y = JSON.parse(maps_infos);
                     // console.log(y);
-                    console.log(y.results[0].address_components[3].long_name);
-                    where = y.results[0].address_components[3].long_name;
+                    console.log(Number(y.results[0].geometry.location.lat));
+                    console.log(Number(y.results[0].geometry.location.lng));
                     var cursor = db.collection('user-data').find({
                         sexe: req.session.user.need,
-                        "location": where
+                        "location": { $near: { $geometry:
+                        {
+                            type:"Point",
+                            coordinates:[Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
+                        },
+                            $maxDistance:30000}}
                     }).sort({_id: -1});
                     cursor.forEach(function (doc, err) {
                         assert.equal(null, err);
@@ -159,31 +143,15 @@ router.post('/region', function(req, res, next) {
                             resultArray.push(doc);
                         }
                     }, function () {
-                        var cursor = db.collection('user-data').find({
-                            sexe: req.session.user.need,
-                            "age": {
-                                "$gte": String(Number(req.session.user.age - 5)),
-                                "$lte": String(Number(req.session.user.age + 5))
-                            },
-                            "location": {$ne: where}
-                        })
-                            .sort({_id: -1});
-                        cursor.forEach(function (doc, err) {
-                            assert.equal(null, err);
-                            if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
-                                resultArray2.push(doc);
-                            }
-                        }, function () {
                             db.close();
-                            if (!resultArray[0] && !resultArray2[0])
+                            if (!resultArray[0])
                                 res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                             else
-                                res.render('filtred', {items: resultArray, maybe: resultArray2, which: "region " + req.body.zip});
+                                res.render('filtred', {items: resultArray, which: "region " + req.body.zip});
                         });
                     });
                 });
             });
-        });
     }
     else  {
         mongo.connect(url, function (err, db) {
@@ -196,11 +164,14 @@ router.post('/region', function(req, res, next) {
                 resp.on('data', function (maps_infos) {
                     var y = JSON.parse(maps_infos);
                     // console.log(y);
-                    console.log(y.results[0].address_components[3].long_name);
-                    where = y.results[0].address_components[3].long_name;
                     var cursor = db.collection('user-data').find({
                         "need" : {$in: ["Les deux", req.session.user.sexe]},
-                        "location": where
+                        "location": { $near: { $geometry:
+                        {
+                            type:"Point",
+                            coordinates:[Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
+                        },
+                            $maxDistance:30000}}
                     }).sort({_id: -1});
                     cursor.forEach(function (doc, err) {
                         assert.equal(null, err);
@@ -208,41 +179,20 @@ router.post('/region', function(req, res, next) {
                             resultArray.push(doc);
                         }
                     }, function () {
-                        var cursor = db.collection('user-data').find({
-                            "need" : {$in: ["Les deux", req.session.user.sexe]},
-                            "age": {
-                                "$gte": String(Number(req.session.user.age - 5)),
-                                "$lte": String(Number(req.session.user.age + 5))
-                            },
-                            "location": {$ne: where}
-                        })
-                            .sort({_id: -1});
-                        cursor.forEach(function (doc, err) {
-                            assert.equal(null, err);
-                            if (String(doc._id) != String(req.session.user._id)) {
-                                resultArray2.push(doc);
-                            }
-                        }, function () {
                             db.close();
-                            if (!resultArray[0] && !resultArray2[0])
+                            if (!resultArray[0])
                                 res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                             else
-                                res.render('filtred', {items: resultArray, maybe: resultArray2, which: "region " + req.body.zip});
+                                res.render('filtred', {items: resultArray, which: "region " + req.body.zip});
                         });
                     });
                 });
             });
-        });
     }
 });
 
 router.post('/tags', function(req, res, next) {
-    // console.log(req.body.tags);
     splited = req.body.tags.split(" ");
-    // var i = 0;
-    // while (splited[i])
-    //     console.log(splited[i++]);
-    // console.log(req.session.user.tags_str.split(" "));
 
     var resultArray = [];
     if (req.session.user.need != "Les deux") {
@@ -250,7 +200,13 @@ router.post('/tags', function(req, res, next) {
             assert.equal(null, err);
 
             var cursor = db.collection('user-data').find({
-                sexe: req.session.user.need
+                sexe: req.session.user.need,
+                "location": { $near: { $geometry:
+                {
+                    type:"Point",
+                    coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                },
+                    $maxDistance:30000}}
             }).sort({_id: -1});
             cursor.forEach(function (doc, err) {
                 assert.equal(null, err);
@@ -307,10 +263,10 @@ router.post('/tags', function(req, res, next) {
                 // console.log(newTab);
                 // console.log(newTab2);
 
-                if (!resultArray[0])
+                if (!newTab[0])
                     res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                 else
-                    res.render('filtred', {items: newTab, maybe: newTab2, which: "tags " + req.body.tags});
+                    res.render('filtred', {items: newTab, which: "tags " + req.body.tags});
             });
         });
     }
@@ -319,7 +275,13 @@ router.post('/tags', function(req, res, next) {
             assert.equal(null, err);
 
             var cursor = db.collection('user-data').find({
-                "need" : {$in: ["Les deux", req.session.user.sexe]}
+                "need" : {$in: ["Les deux", req.session.user.sexe]},
+                "location": { $near: { $geometry:
+                {
+                    type:"Point",
+                    coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                },
+                    $maxDistance:30000}}
             }).sort({_id: -1});
             cursor.forEach(function (doc, err) {
                 assert.equal(null, err);
@@ -376,10 +338,10 @@ router.post('/tags', function(req, res, next) {
                 // console.log(newTab);
                 // console.log(newTab2);
 
-                if (!resultArray[0])
+                if (!newTab[0])
                     res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                 else
-                    res.render('filtred', {items: newTab, maybe: newTab2, which: "tags " + req.body.tags});
+                    res.render('filtred', {items: newTab, which: "tags " + req.body.tags});
             });
         });
     }

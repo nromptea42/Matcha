@@ -35,21 +35,18 @@ function requireLogin (req, res, next) {
 function get_index(req, res, sort) {
     var resultArray = [];
     var need = req.session.user.need;
-    var range_min = req.session.user.age - 5;
-    // console.log(range_min);
-    var range_max = Number(req.session.user.age) + 5;
-    // console.log(range_max);
-    var where;
-    if (req.session.user.location)
-        where = req.session.user.location;
-    else
-        where = req.session.user.hidden_location;
+
     if (req.session.user.need != "Les deux") {
         mongo.connect(url, function (err, db) {
             assert.equal(null, err);
             var cursor = db.collection('user-data').find({
                 sexe: need,
-                "age": {"$gte": String(range_min), "$lte": String(range_max)}, "location": where
+                "location": { $near: { $geometry:
+                {
+                    type:"Point",
+                    coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                },
+                    $maxDistance:30000}}
             }).sort(sort);
             cursor.forEach(function (doc, err) {
                 assert.equal(null, err);
@@ -70,8 +67,12 @@ function get_index(req, res, sort) {
             assert.equal(null, err);
             var cursor = db.collection('user-data').find({
                 "need" : {$in: ["Les deux", req.session.user.sexe]},
-                "age": {"$gte": String(range_min), "$lte": String(range_max)},
-                "location": where
+                "location": { $near: { $geometry:
+                {
+                    type:"Point",
+                    coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                },
+                    $maxDistance:30000}}
             }).sort(sort);
             cursor.forEach(function (doc, err) {
                 assert.equal(null, err);
@@ -94,10 +95,6 @@ function get_age(req, res, age_min, age_max, sort) {
     var resultArray = [];
     var resultArray2 = [];
 
-    if (req.session.user.location)
-        where = req.session.user.location;
-    else
-        where = req.session.user.hidden_location;
     if (age_min <= age_max) {
         if (req.session.user.need != "Les deux") {
             mongo.connect(url, function (err, db) {
@@ -105,7 +102,13 @@ function get_age(req, res, age_min, age_max, sort) {
 
                 var cursor = db.collection('user-data').find({
                     sexe: req.session.user.need,
-                    "age": {"$gte": String(age_min), "$lte": String(age_max)}, "location": where
+                    "age": {"$gte": String(age_min), "$lte": String(age_max)},
+                    "location": { $near: { $geometry:
+                    {
+                        type:"Point",
+                        coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                    },
+                        $maxDistance:30000}}
                 }).sort(sort);
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
@@ -113,30 +116,16 @@ function get_age(req, res, age_min, age_max, sort) {
                         resultArray.push(doc);
                     }
                 }, function () {
-                    var cursor = db.collection('user-data').find({
-                        sexe: req.session.user.need,
-                        "age": {"$gte": String(age_min), "$lte": String(age_max)},
-                        "location": {$ne: where}
-                    })
-                        .sort(sort);
-                    cursor.forEach(function (doc, err) {
-                        assert.equal(null, err);
-                        if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
-                            resultArray2.push(doc);
-                        }
-                    }, function () {
                         db.close();
-                        if (!resultArray[0] && !resultArray2[0])
+                        if (!resultArray[0])
                             res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                         else
                             res.render('filtred', {
                                 items: resultArray,
-                                maybe: resultArray2,
                                 which: "age " + age_min + " " + age_max
                             });
                     });
                 });
-            });
         }
         else {
             mongo.connect(url, function (err, db) {
@@ -145,7 +134,12 @@ function get_age(req, res, age_min, age_max, sort) {
                 var cursor = db.collection('user-data').find({
                     "need" : {$in: ["Les deux", req.session.user.sexe]},
                     "age": {"$gte": String(age_min), "$lte": String(age_max)},
-                    "location": where
+                    "location": { $near: { $geometry:
+                    {
+                        type:"Point",
+                        coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                    },
+                        $maxDistance:30000}}
                 }).sort(sort);
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
@@ -153,29 +147,16 @@ function get_age(req, res, age_min, age_max, sort) {
                         resultArray.push(doc);
                     }
                 }, function () {
-                    var cursor = db.collection('user-data').find({
-                        "need" : {$in: ["Les deux", req.session.user.sexe]},
-                        "age": {"$gte": String(age_min), "$lte": String(age_max)},
-                        "location": {$ne: where}
-                    }).sort(sort);
-                    cursor.forEach(function (doc, err) {
-                        assert.equal(null, err);
-                        if (String(doc._id) != String(req.session.user._id)) {
-                            resultArray2.push(doc);
-                        }
-                    }, function () {
                         db.close();
-                        if (!resultArray[0] && !resultArray2[0])
+                        if (!resultArray[0])
                             res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                         else
                             res.render('filtred', {
                                 items: resultArray,
-                                maybe: resultArray2,
                                 which: "age " + age_min + " " + age_max
                             });
                     });
                 });
-            });
         }
 
     }
@@ -193,7 +174,13 @@ function get_tags(req, res, str, sort) {
             assert.equal(null, err);
 
             var cursor = db.collection('user-data').find({
-                sexe: req.session.user.need
+                sexe: req.session.user.need,
+                "location": { $near: { $geometry:
+                {
+                    type:"Point",
+                    coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                },
+                    $maxDistance:50000}}
             }).sort(sort);
             cursor.forEach(function (doc, err) {
                 assert.equal(null, err);
@@ -221,22 +208,6 @@ function get_tags(req, res, str, sort) {
                 }
             }, function () {
                 db.close();
-                // len = resultArray.length;
-                // var tmp;
-                //
-                // while (len - 1 > 0) {
-                //     var k = 0;
-                //     while (resultArray[k + 1]) {
-                //         if (resultArray[k].nb_match < resultArray[k + 1].nb_match) {
-                //             tmp = resultArray[k];
-                //             resultArray[k] = resultArray[k + 1];
-                //             resultArray[k + 1] = tmp;
-                //         }
-                //         k++;
-                //     }
-                //     len--;
-                // }
-                //
                 var i = 0;
                 var newTab = [];
                 // var newTab2 = [];
@@ -244,12 +215,6 @@ function get_tags(req, res, str, sort) {
                     newTab[i] = resultArray[i].user;
                     i++;
                 }
-                // while (resultArray[i]) {
-                //     newTab2[i] = resultArray[i].user;
-                //     i++;
-                // }
-                // console.log(newTab);
-                // console.log(newTab2);
 
                 if (!resultArray[0])
                     res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
@@ -259,12 +224,17 @@ function get_tags(req, res, str, sort) {
         });
     }
     else {
-        console.log("oui");
         mongo.connect(url, function (err, db) {
             assert.equal(null, err);
 
             var cursor = db.collection('user-data').find({
-                "need" : {$in: ["Les deux", req.session.user.sexe]}
+                "need" : {$in: ["Les deux", req.session.user.sexe]},
+                "location": { $near: { $geometry:
+                {
+                    type:"Point",
+                    coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                },
+                    $maxDistance:30000}}
             }).sort(sort);
             cursor.forEach(function (doc, err) {
                 assert.equal(null, err);
@@ -292,22 +262,6 @@ function get_tags(req, res, str, sort) {
                 }
             }, function () {
                 db.close();
-                // len = resultArray.length;
-                // var tmp;
-                //
-                // while (len - 1 > 0) {
-                //     var k = 0;
-                //     while (resultArray[k + 1]) {
-                //         if (resultArray[k].nb_match < resultArray[k + 1].nb_match) {
-                //             tmp = resultArray[k];
-                //             resultArray[k] = resultArray[k + 1];
-                //             resultArray[k + 1] = tmp;
-                //         }
-                //         k++;
-                //     }
-                //     len--;
-                // }
-                //
                 var i = 0;
                 var newTab = [];
                 // var newTab2 = [];
@@ -315,12 +269,6 @@ function get_tags(req, res, str, sort) {
                     newTab[i] = resultArray[i].user;
                     i++;
                 }
-                // while (resultArray[i]) {
-                //     newTab2[i] = resultArray[i].user;
-                //     i++;
-                // }
-                // console.log(newTab);
-                // console.log(newTab2);
 
                 if (!resultArray[0])
                     res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
@@ -332,7 +280,6 @@ function get_tags(req, res, str, sort) {
 }
 
 function get_region(req, res, zip, sort) {
-    var where;
     var resultArray = [];
     var resultArray2 = [];
 
@@ -347,11 +294,14 @@ function get_region(req, res, zip, sort) {
                 resp.on('data', function (maps_infos) {
                     var y = JSON.parse(maps_infos);
                     // console.log(y);
-                    console.log(y.results[0].address_components[3].long_name);
-                    where = y.results[0].address_components[3].long_name;
                     var cursor = db.collection('user-data').find({
                         sexe: req.session.user.need,
-                        "location": where
+                        "location": { $near: { $geometry:
+                        {
+                            type:"Point",
+                            coordinates:[Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
+                        },
+                            $maxDistance:30000}}
                     }).sort(sort);
                     cursor.forEach(function (doc, err) {
                         assert.equal(null, err);
@@ -359,30 +309,15 @@ function get_region(req, res, zip, sort) {
                             resultArray.push(doc);
                         }
                     }, function () {
-                        var cursor = db.collection('user-data').find({
-                            sexe: req.session.user.need,
-                            "age": {
-                                "$gte": String(Number(req.session.user.age - 5)),
-                                "$lte": String(Number(req.session.user.age + 5))
-                            },
-                            "location": {$ne: where}
-                        }).sort(sort);
-                        cursor.forEach(function (doc, err) {
-                            assert.equal(null, err);
-                            if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
-                                resultArray2.push(doc);
-                            }
-                        }, function () {
                             db.close();
-                            if (!resultArray[0] && !resultArray2[0])
+                            if (!resultArray[0])
                                 res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                             else
-                                res.render('filtred', {items: resultArray, maybe: resultArray2, which: "region"});
+                                res.render('filtred', {items: resultArray, which: "region"});
                         });
                     });
                 });
             });
-        });
     }
     else  {
         mongo.connect(url, function (err, db) {
@@ -395,11 +330,14 @@ function get_region(req, res, zip, sort) {
                 resp.on('data', function (maps_infos) {
                     var y = JSON.parse(maps_infos);
                     // console.log(y);
-                    console.log(y.results[0].address_components[3].long_name);
-                    where = y.results[0].address_components[3].long_name;
                     var cursor = db.collection('user-data').find({
                         "need" : {$in: ["Les deux", req.session.user.sexe]},
-                        "location": where
+                        "location": { $near: { $geometry:
+                        {
+                            type:"Point",
+                            coordinates:[Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
+                        },
+                            $maxDistance:30000}}
                     }).sort(sort);
                     cursor.forEach(function (doc, err) {
                         assert.equal(null, err);
@@ -407,22 +345,8 @@ function get_region(req, res, zip, sort) {
                             resultArray.push(doc);
                         }
                     }, function () {
-                        var cursor = db.collection('user-data').find({
-                            "need" : {$in: ["Les deux", req.session.user.sexe]},
-                            "age": {
-                                "$gte": String(Number(req.session.user.age - 5)),
-                                "$lte": String(Number(req.session.user.age + 5))
-                            },
-                            "location": {$ne: where}
-                        }).sort(sort);
-                        cursor.forEach(function (doc, err) {
-                            assert.equal(null, err);
-                            if (String(doc._id) != String(req.session.user._id)) {
-                                resultArray2.push(doc);
-                            }
-                        }, function () {
                             db.close();
-                            if (!resultArray[0] && !resultArray2[0])
+                            if (!resultArray[0])
                                 res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                             else
                                 res.render('filtred', {items: resultArray, maybe: resultArray2, which: "region " + zip});
@@ -430,7 +354,6 @@ function get_region(req, res, zip, sort) {
                     });
                 });
             });
-        });
     }
 }
 

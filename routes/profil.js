@@ -113,7 +113,15 @@ router.post('/update', function(req, res, next) {
     item.tags = split;
     item.tags_str = req.body.tags;
     var id = req.body.id;
-    item.ville = req.body.location;
+    check = "yes";
+
+    if (!req.body.location) {
+        item.ville = "paris";
+        check = "no";
+    }
+    else {
+        item.ville = req.body.location.replace(/ /g, "-"); // TODO: bite
+    }
 
     http.get({'host': 'maps.googleapis.com',
         'path': '/maps/api/geocode/json?address=' + item.ville + ",%20France"}, function(resp) {
@@ -121,8 +129,11 @@ router.post('/update', function(req, res, next) {
             var y = JSON.parse(maps_infos);
             // console.log(y);
             console.log(y.results[0].address_components[0].long_name);
-            if (req.body.location) {
-                item.ville = y.results[0].address_components[0].long_name;
+            if (item.ville) {
+                if (check == "no")
+                    item.ville = "";
+                else
+                    item.ville = y.results[0].address_components[0].long_name;
                 item.location.coordinates = [Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
             }
 
