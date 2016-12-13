@@ -11,8 +11,9 @@
                 <input type="hidden" name="which" value="{{which}}">
                 <button type="submit">Trier par tags en commun</button>
             </form>
-            <form onsubmit="return false;">
-                <input type="submit" value="Trier par localisation">
+            <form action="/tri/ville" method="post">
+                <input type="hidden" name="which" value="{{which}}">
+                <button type="submit">Trier par proximité</button>
             </form>
             {{ msg }}
             {{# each items }}

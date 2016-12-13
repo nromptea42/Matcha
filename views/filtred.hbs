@@ -11,8 +11,9 @@
                 <input type="hidden" name="which" value="{{which}}">
                 <button type="submit">Trier par tags en commun</button>
             </form>
-            <form onsubmit="return false;">
-                <input type="submit" value="Trier par localisation">
+            <form action="/tri/ville" method="post">
+                <input type="hidden" name="which" value="{{which}}">
+                <button type="submit">Trier par proximité</button>
             </form>
             {{ msg }}
             {{# each items }}
@@ -21,7 +22,7 @@
                         <div class="card-content white-text">
                             <span class="card-title">{{ this.prenom }} {{ this.nom }}</span>
                             <p>Sexe : {{ this.sexe }}</p>
-                            <p>Recherche : {{this.need}}</p>
+                            <p>Recherche : {{ this.need}}</p>
                             <p>Age : {{ this.age }}</p>
                             <p>Tags : {{this.tags}}</p>
                             <p>id : {{ this._id }}</p>

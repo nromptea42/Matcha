@@ -6,6 +6,7 @@ var assert = require('assert');
 var url = "mongodb://localhost:27017/test";
 
 var http = require('http');
+var S = require('string');
 
 router.use(function (req, res, next) {
     if (req.session && req.session.user) {
@@ -41,9 +42,7 @@ router.post('/age', function(req, res, next) {
     console.log(req.body.age_min);
     console.log(req.body.age_max);
 
-    var where;
     var resultArray = [];
-    var resultArray2 = [];
 
     if (req.body.age_min <= req.body.age_max) {
         if (req.session.user.need != "Les deux") {
@@ -121,7 +120,7 @@ router.post('/region', function(req, res, next) {
 
             http.get({
                 'host': 'maps.googleapis.com',
-                'path': '/maps/api/geocode/json?address=' + req.body.zip + ",%20France"
+                'path': '/maps/api/geocode/json?address=' + S(req.body.zip).slugify().s + ",%20France"
             }, function (resp) {
                 resp.on('data', function (maps_infos) {
                     var y = JSON.parse(maps_infos);
@@ -201,12 +200,6 @@ router.post('/tags', function(req, res, next) {
 
             var cursor = db.collection('user-data').find({
                 sexe: req.session.user.need,
-                "location": { $near: { $geometry:
-                {
-                    type:"Point",
-                    coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
-                },
-                    $maxDistance:30000}}
             }).sort({_id: -1});
             cursor.forEach(function (doc, err) {
                 assert.equal(null, err);
@@ -276,12 +269,6 @@ router.post('/tags', function(req, res, next) {
 
             var cursor = db.collection('user-data').find({
                 "need" : {$in: ["Les deux", req.session.user.sexe]},
-                "location": { $near: { $geometry:
-                {
-                    type:"Point",
-                    coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
-                },
-                    $maxDistance:30000}}
             }).sort({_id: -1});
             cursor.forEach(function (doc, err) {
                 assert.equal(null, err);

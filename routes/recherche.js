@@ -6,6 +6,7 @@ var assert = require('assert');
 var url = "mongodb://localhost:27017/test";
 
 var http = require('http');
+var S = require('string');
 
 router.use(function (req, res, next) {
     if (req.session && req.session.user) {
@@ -43,15 +44,14 @@ router.post('/things', requireLogin, function(req, res, next) {
         res.render('recherche', {msg: "Tous les champs doivent etre rempli"});
     else {
         if (Number.isInteger(Number(req.body.age_min)) && Number.isInteger(Number(req.body.age_max))
-            && Number.isInteger(Number(req.body.popu_min)) &&
-            Number.isInteger(Number(req.body.popu_max))) {
+            && Number.isInteger(Number(req.body.popu_min)) && Number.isInteger(Number(req.body.popu_max))) {
             if (req.body.age_min <= req.body.age_max) {
                 mongo.connect(url, function (err, db) {
                     assert.equal(null, err);
 
                     http.get({
                         'host': 'maps.googleapis.com',
-                        'path': '/maps/api/geocode/json?address=' + req.body.zip + ",%20France"}, function (resp) {
+                        'path': '/maps/api/geocode/json?address=' + S(req.body.zip).slugify().s + ",%20France"}, function (resp) {
                         resp.on('data', function (maps_infos) {
                             var y = JSON.parse(maps_infos);
                             var splited = req.body.tags.split(" ");
@@ -126,7 +126,12 @@ router.post('/things', requireLogin, function(req, res, next) {
                                 if (!newTab[0])
                                     res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                                 else
-                                    res.render('filtred', {items: newTab, which: "tags " + req.body.tags}); // TODO: JE PEUX PAS TRIER LOL
+                                    res.render('filtred', {items: newTab,
+                                        which: "recherche "
+                                        + req.body.age_min + " "
+                                        + req.body.age_max + " "
+                                        + req.body.zip + " "
+                                        + req.body.tags}); // TODO: JE PEUX PAS TRIER LOL
                             });
                         });
                     });
@@ -137,6 +142,5 @@ router.post('/things', requireLogin, function(req, res, next) {
             res.render('recherche', {msg: "Les valeurs sont incorrects"});
     }
 });
-
 
 module.exports = router;

@@ -6,6 +6,7 @@ var assert = require('assert');
 
 var url = "mongodb://localhost:27017/test";
 var http = require('http');
+var S = require('string');
 
 var multer  = require('multer');
 var storage =  multer.diskStorage({
@@ -15,7 +16,7 @@ var storage =  multer.diskStorage({
     filename: function (req, file, callback) {
         callback(null, file.originalname);
     }
-})
+});
 var upload = multer({
     storage: storage,
     limits: { fileSize: 1 * 1000 * 1000 },
@@ -54,7 +55,7 @@ router.get('/', requireLogin, function(req, res, next) {
     res.redirect('/profil/' + id);
 });
 
-router.post('/oui', function(req, res, next) {
+router.post('/oui', requireLogin, function(req, res, next) {
     if (req.body.update && (req.session.user._id == req.body.id))
         var id = req.session.user._id + "/update";
     else
@@ -63,7 +64,7 @@ router.post('/oui', function(req, res, next) {
     res.redirect('/profil/' + id);
 });
 
-router.get('/:id', function(req, res, next) {
+router.get('/:id', requireLogin, function(req, res, next) {
     mongo.connect(url, function (err, db) {
         assert.equal(null, err);
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
@@ -74,7 +75,7 @@ router.get('/:id', function(req, res, next) {
     });
 });
 
-router.get('/:id/update', function(req, res, next) {
+router.get('/:id/update', requireLogin, function(req, res, next) {
     mongo.connect(url, function (err, db) {
         assert.equal(null, err);
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
@@ -85,7 +86,7 @@ router.get('/:id/update', function(req, res, next) {
     });
 });
 
-router.post('/update', function(req, res, next) {
+router.post('/update', requireLogin, function(req, res, next) {
     var item = {
         nom: req.body.nom,
         prenom: req.body.prenom,
@@ -120,15 +121,16 @@ router.post('/update', function(req, res, next) {
         check = "no";
     }
     else {
-        item.ville = req.body.location.replace(/ /g, "-"); // TODO: bite
+        item.ville = S(req.body.location).slugify().s;
     }
 
+    console.log(item.ville);
     http.get({'host': 'maps.googleapis.com',
         'path': '/maps/api/geocode/json?address=' + item.ville + ",%20France"}, function(resp) {
         resp.on('data', function(maps_infos) {
             var y = JSON.parse(maps_infos);
             // console.log(y);
-            console.log(y.results[0].address_components[0].long_name);
+            // console.log(y.results[0].address_components[0].long_name);
             if (item.ville) {
                 if (check == "no")
                     item.ville = "";
