@@ -1,0 +1,18 @@
+<h1>{{ items.prenom }}</h1>
+
+{{#each items.src_img}}
+    <img class="photo" src="{{this}}">
+{{/each}}
+<div>Id: {{ items._id }}</div>
+<div>Nom : {{items.nom}}</div>
+<div>Prenom : {{items.prenom}}</div>
+<div>Age : {{items.age }}</div>
+<div>Sexe : {{items.sexe}}</div>
+<div>Je recherche : {{items.need}}</div>
+<div>Habite a : {{items.ville}}</div>
+<div>Description : {{items.bio}}</div>
+<div>Tags :
+    {{# each items.tags }}
+        {{this}}
+    {{/each}}
+</div>

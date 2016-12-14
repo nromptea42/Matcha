@@ -27,9 +27,9 @@
                             <p>Tags : {{this.tags}}</p>
                             <p>id : {{ this._id }}</p>
                         </div>
-                        <form action="/liste/delete" method="post" style="text-align: center;">
+                        <form action="/visit" method="get" style="text-align: center;">
                             <input type="hidden" value="{{ this._id }}" name="id">
-                            <!--<button class="btn btn-danger" type="submit">Delete</button>-->
+                            <button class="btn btn-danger" type="submit">Profil</button>
                             <!--<button class="btn btn-primary" type="submit" formaction="/liste/profil">Profil</button>-->
                         </form>
                     </div>

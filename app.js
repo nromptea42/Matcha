@@ -13,6 +13,7 @@ var profil = require('./routes/profil');
 var filtre = require('./routes/filtre');
 var tri = require('./routes/tri');
 var recherche = require('./routes/recherche');
+var visit = require('./routes/visit');
 
 var session = require('client-sessions');
 var app = express();
@@ -43,6 +44,7 @@ app.use('/profil', profil);
 app.use('/filtre', filtre);
 app.use('/tri', tri);
 app.use('/recherche', recherche);
+app.use('/visit', visit);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
