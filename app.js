@@ -18,6 +18,8 @@ var visit = require('./routes/visit');
 
 var session = require('client-sessions');
 var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 
 // view engine setup
 app.engine('hbs', hbs({extname: 'hbs', defaultLayout: 'layout', layoutsDir: __dirname+ '/views'}));
@@ -37,6 +39,11 @@ app.use(session({
   duration: 60 * 60 * 1000,
   activeDuration: 10 * 60 * 1000
 }));
+
+app.use(function(req, res, next) {
+  res.io = io;
+  next();
+});
 
 app.use('/', routes);
 app.use('/inscription', inscription);
@@ -80,4 +87,4 @@ app.use(function(err, req, res, next) {
 });
 
 
-module.exports = app;
+module.exports = {app: app, server: server};

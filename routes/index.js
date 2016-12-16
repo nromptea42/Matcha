@@ -40,8 +40,7 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function generateRandomString(length)
-{
+function generateRandomString(length) {
     var characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     var charactersLength = characters.length;
     var randomString = '';
@@ -87,7 +86,8 @@ function sendMail (mail, str, salt) {
 /* GET home page. */
 router.get('/', requireLogin, function(req, res, next) {
     var resultArray = [];
-
+    res.io.emit("news", { hello: 'world' });
+    console.log("sent");
     // console.log(req.session.user);
     if (req.session.user.sexe) {
         var need = req.session.user.need;

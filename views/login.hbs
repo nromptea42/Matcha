@@ -1,3 +1,12 @@
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var socket = io.connect('http://localhost:8000');
+    socket.on('news', function (data) {
+        console.log(data);
+        socket.emit('my other event', { my: 'data' });
+    });
+</script>
+
 <form action="/login" id="formID" method="post" style="margin-top: 200px;">
     <input type="text" name="email" autofocus required placeholder="Email"><br />
     <input type="password" name="mdp" required placeholder="Mot de passe">
