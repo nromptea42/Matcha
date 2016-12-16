@@ -26,6 +26,7 @@ router.get('/', requireLogin, function(req, res, next) {
 });
 
 router.get('/:id', requireLogin, function(req, res, next) {
+    console.log("id");
     mongo.connect(url, function (err, db) {
         assert.equal(null, err);
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
@@ -35,4 +36,34 @@ router.get('/:id', requireLogin, function(req, res, next) {
     });
 });
 
+router.post('/like', requireLogin, function(req, res, next) {
+    // console.log(req.body.id);
+    var i = 0;
+    var item = {
+        liked: req.session.user.liked
+    };
+    var check = true;
+
+    while(item.liked[i])
+    {
+        if (item.liked[i] == req.body.id)
+            check = false;
+        i++;
+    }
+    console.log(item.liked);
+    if (check) {
+        item.liked.push(req.body.id);
+        mongo.connect(url, function (err, db) {
+            assert.equal(null, err);
+            db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)}, {$set: item}, function (err, result) {
+                assert.equal(null, err);
+                console.log('Item updated');
+                db.close();
+                res.redirect('/visit/' + req.body.id);
+            });
+        });
+    }
+    else
+        res.redirect('/visit/' + req.body.id);
+});
 module.exports = router;
