@@ -10,3 +10,15 @@
 .oui {
     position: relative;
 }
+
+#messages {
+    height: 500px;
+    overflow-y: scroll;
+}
+
+#messages > p {
+    display: block;
+    width: inherit;
+    height: auto;
+    overflow: hidden;
+}

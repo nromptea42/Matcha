@@ -1,0 +1,21 @@
+<div id="messages"></div>
+<form action="">
+    <input id="m" autocomplete="off" />
+</form>
+<button>Send</button>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+    var socket = io();
+    $('form').submit(function(){
+        socket.emit('chat message', $('#m').val());
+        $('#m').val('');
+        return false;
+    });
+    socket.on('bite', function(msg){
+        $('#messages').append('<p>' + msg + '</p>');
+        var len = $('#messages > p').length;
+        $('#messages').scrollTop(len * 100);
+    });
+</script>

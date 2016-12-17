@@ -15,6 +15,7 @@ var filtre = require('./routes/filtre');
 var tri = require('./routes/tri');
 var recherche = require('./routes/recherche');
 var visit = require('./routes/visit');
+var message = require('./routes/message');
 
 var session = require('client-sessions');
 var app = express();
@@ -54,6 +55,7 @@ app.use('/filtre', filtre);
 app.use('/tri', tri);
 app.use('/recherche', recherche);
 app.use('/visit', visit);
+app.use('/message', message);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -86,5 +88,11 @@ app.use(function(err, req, res, next) {
   });
 });
 
+io.on('connection', function(client) {
+  // console.log(client);
+  client.on('chat message', function(msg){
+    io.emit('bite', msg);
+  });
+});
 
 module.exports = {app: app, server: server};
