@@ -15,7 +15,32 @@ function requireLogin (req, res, next) {
 };
 
 router.get('/', requireLogin, function(req, res, next) {
-    res.render('message');
+    // console.log(req.session.user.liked);
+    var match = [];
+    mongo.connect(url, function (err, db) {
+        assert.equal(null, err);
+        var i = 0;
+        var cursor = db.collection('user-data').find();
+        cursor.forEach(function (doc, err) {
+            assert.equal(null, err);
+            // console.log(doc);
+                if (req.session.user.liked[i] == String(doc._id)) {
+                        var j = 0;
+                        while (doc.liked[j]) {
+                            if (doc.liked[j] == req.session.user._id) {
+                                console.log("i'm here");
+                                match.push(doc._id);
+                            }
+                            j++;
+                        }
+                        i++;
+                }
+        }, function () {
+            // db.close();
+            console.log(match);
+            res.render('message', {exp: req.session.user._id});
+        });
+    });
 });
 
 module.exports = router;

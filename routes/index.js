@@ -86,8 +86,6 @@ function sendMail (mail, str, salt) {
 /* GET home page. */
 router.get('/', requireLogin, function(req, res, next) {
     var resultArray = [];
-    // res.io.emit("news", { hello: 'world' });
-    console.log("sent");
     // console.log(req.session.user);
     if (req.session.user.sexe) {
         var need = req.session.user.need;

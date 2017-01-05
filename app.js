@@ -90,8 +90,10 @@ app.use(function(err, req, res, next) {
 
 io.on('connection', function(client) {
   // console.log(client);
-  client.on('chat message', function(msg){
-    io.emit('bite', msg);
+  client.on('chat message', function(msg) {
+    console.log(msg);
+    // if (msg.exp == "5852a9fa48b53b154da81459")
+      io.emit(msg.exp, msg.msg);
   });
 });
 

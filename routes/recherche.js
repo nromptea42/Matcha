@@ -131,7 +131,7 @@ router.post('/things', requireLogin, function(req, res, next) {
                                         + req.body.age_min + " "
                                         + req.body.age_max + " "
                                         + req.body.zip + " "
-                                        + req.body.tags}); // TODO: JE PEUX PAS TRIER LOL
+                                        + req.body.tags});
                             });
                         });
                     });

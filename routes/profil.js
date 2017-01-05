@@ -65,14 +65,18 @@ router.post('/oui', requireLogin, function(req, res, next) {
 });
 
 router.get('/:id', requireLogin, function(req, res, next) {
-    mongo.connect(url, function (err, db) {
-        assert.equal(null, err);
-        db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
-            db.close();
-            /* Check pour data en dur + bouton vers route 'oui' */
-            res.render('profil', {items: cursor, check: true});
+    if (req.params.id == req.session.user._id) {
+        mongo.connect(url, function (err, db) {
+            assert.equal(null, err);
+            db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
+                db.close();
+                /* Check pour data en dur + bouton vers route 'oui' */
+                res.render('profil', {items: cursor, check: true});
+            });
         });
-    });
+    }
+    else
+        res.redirect('/visit/' + req.params.id);
 });
 
 router.get('/:id/update', requireLogin, function(req, res, next) {

@@ -1,6 +1,7 @@
 <div id="messages"></div>
 <form action="">
     <input id="m" autocomplete="off" />
+    <input type="hidden" id="exp" value="{{exp}}" name="exp" />
 </form>
 <button>Send</button>
 
@@ -9,11 +10,11 @@
 <script>
     var socket = io();
     $('form').submit(function(){
-        socket.emit('chat message', $('#m').val());
+        socket.emit('chat message',{msg: $('#m').val(), exp: $('#exp').val() });
         $('#m').val('');
         return false;
     });
-    socket.on('bite', function(msg){
+    socket.on($('#exp').val(), function(msg){
         $('#messages').append('<p>' + msg + '</p>');
         var len = $('#messages > p').length;
         $('#messages').scrollTop(len * 100);
