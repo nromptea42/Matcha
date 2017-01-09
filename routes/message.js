@@ -12,7 +12,17 @@ function requireLogin (req, res, next) {
     } else {
         next();
     }
-};
+}
+
+function isInTab (data, tab) {
+    var i = 0;
+    while (tab[i]) {
+        if (tab[i] == data)
+            return true;
+        i++;
+    }
+    return false;
+}
 
 router.get('/', requireLogin, function(req, res, next) {
     // console.log(req.session.user.liked);
@@ -24,21 +34,34 @@ router.get('/', requireLogin, function(req, res, next) {
         cursor.forEach(function (doc, err) {
             assert.equal(null, err);
             // console.log(doc);
-                if (req.session.user.liked[i] == String(doc._id)) {
-                        var j = 0;
-                        while (doc.liked[j]) {
-                            if (doc.liked[j] == req.session.user._id) {
-                                console.log("i'm here");
-                                match.push(doc._id);
-                            }
-                            j++;
-                        }
-                        i++;
+                if (isInTab(String(doc._id), req.session.user.liked)) {
+                    if (isInTab(String(req.session.user._id), doc.liked)) {
+                        console.log("MATCH");
+                        match.push(doc);
+                    }
                 }
         }, function () {
-            // db.close();
+            db.close();
             console.log(match);
-            res.render('message', {exp: req.session.user._id});
+            res.render('matched', {match: match});
+        });
+    });
+});
+
+router.get('/go', requireLogin, function(req, res, next) {
+    console.log(req.query.id);
+    if (req.query.id)
+        res.redirect('/message/' + req.query.id);
+    else
+        res.redirect('/');
+});
+
+router.get('/:id', requireLogin, function(req, res, next) {
+    mongo.connect(url, function (err, db) {
+        assert.equal(null, err);
+        db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
+            db.close();
+            res.render('message', {exp: req.session.user._id, dest: cursor._id});
         });
     });
 });

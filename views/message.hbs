@@ -2,20 +2,26 @@
 <form action="">
     <input id="m" autocomplete="off" />
     <input type="hidden" id="exp" value="{{exp}}" name="exp" />
+    <input type="hidden" id="dest" value="{{dest}}" name="dest" />
+    <button class="btn waves-effect waves-light" type="submit">Send</button>
 </form>
-<button>Send</button>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
     var socket = io();
     $('form').submit(function(){
-        socket.emit('chat message',{msg: $('#m').val(), exp: $('#exp').val() });
+        socket.emit('chat message',{msg: $('#m').val(), exp: $('#exp').val(), dest: $('#dest').val() });
         $('#m').val('');
         return false;
     });
-    socket.on($('#exp').val(), function(msg){
-        $('#messages').append('<p>' + msg + '</p>');
+    socket.on($('#exp').val() + $('#dest').val(), function(msg){
+        $('#messages').append('<p> Me : ' + msg + '</p>');
+        var len = $('#messages > p').length;
+        $('#messages').scrollTop(len * 100);
+    });
+    socket.on($('#dest').val() + $('#exp').val(), function(msg){
+        $('#messages').append('<p> It : ' + msg + '</p>');
         var len = $('#messages > p').length;
         $('#messages').scrollTop(len * 100);
     });

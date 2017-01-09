@@ -22,3 +22,11 @@
     height: auto;
     overflow: hidden;
 }
+
+.match_img {
+    max-width: 200px;
+}
+
+.title {
+    font-size: 3em;
+}

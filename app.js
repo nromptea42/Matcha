@@ -5,6 +5,10 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var hbs = require('express-handlebars');
+var url = "mongodb://localhost:27017/test";
+var mongo = require('mongodb').MongoClient;
+var objectId = require('mongodb').ObjectID;
+var assert = require('assert');
 
 var routes = require('./routes/index');
 var inscription = require('./routes/inscription');
@@ -21,6 +25,7 @@ var session = require('client-sessions');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
+var escape = require('escape-html');
 
 // view engine setup
 app.engine('hbs', hbs({extname: 'hbs', defaultLayout: 'layout', layoutsDir: __dirname+ '/views'}));
@@ -92,8 +97,7 @@ io.on('connection', function(client) {
   // console.log(client);
   client.on('chat message', function(msg) {
     console.log(msg);
-    // if (msg.exp == "5852a9fa48b53b154da81459")
-      io.emit(msg.exp, msg.msg);
+    io.emit(msg.exp + msg.dest, escape(msg.msg));
   });
 });
 

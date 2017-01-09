@@ -1,0 +1,24 @@
+<br />
+{{#each match}}
+
+    <div class="col s12 m7">
+        <div class="card horizontal">
+            <div class="card-image">
+                <img src="{{this.src_img.[0]}}">
+            </div>
+            <div class="card-stacked">
+                <div class="card-content">
+                    <h2>{{this.prenom}}</h2>
+                </div>
+                <div class="card-action">
+                    <form action="/message/go" method="get">
+                        <input type="hidden" value="{{ this._id }}" name="id">
+                        <button class="btn btn-danger" type="submit">Chat here !</button>
+                    </form>
+                    <!--<a href="#">Chat here !</a>-->
+                </div>
+            </div>
+        </div>
+    </div><br />
+
+{{/each}}
