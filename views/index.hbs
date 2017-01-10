@@ -24,7 +24,10 @@
                             <p>Sexe : {{ this.sexe }}</p>
                             <p>Recherche : {{ this.need}}</p>
                             <p>Age : {{ this.age }}</p>
-                            <p>Tags : {{this.tags}}</p>
+                            <p>Tags :</p>
+                            {{# each this.tags }}
+                                #{{this}}&nbsp;
+                            {{/each}}
                             <p>id : {{ this._id }}</p>
                         </div>
                         <form action="/visit" method="get" style="text-align: center;">
