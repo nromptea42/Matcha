@@ -14,7 +14,7 @@
     <div>Description : {{items.bio}}</div>
     <div>Tags :
     {{# each items.tags }}
-        {{this}}
+        #{{this}}&nbsp;
     {{/each}}
     </div>
     <form action="/profil/oui" method="post">
@@ -64,12 +64,39 @@
             <label for="bio">Description</label>
             <textarea class="materialize-textarea" id="bio" name="bio">{{items.bio}}</textarea>
         </div>
-        <div class="input">
-            <label for="tags">Tags</label>
-            <input type="text" id="tags" name="tags" value="{{items.tags_str}}">
-        </div>
+
         <input type="hidden" name="id" value="{{items._id}}">
-        <button type="submit">Update</button>
+        <button type="submit">Update profil</button>
+    </form><br />
+
+    <form action="/profil/tags" method="post">
+
+        <div class="input">
+            <label>Tags</label>
+            <input type="text" list="tags" name="tags">
+        </div>
+
+        <datalist id="tags">
+            {{#each tab_tags}}
+                <option value="{{this}}"></option>
+            {{/each}}
+            <!--<option value="HTML">-->
+            <!--<option value="CSS">-->
+            <!--<option value="JavaScript">-->
+            <!--<option value="Java">-->
+            <!--<option value="Ruby">-->
+            <!--<option value="PHP">-->
+            <!--<option value="Go">-->
+            <!--<option value="Erlang">-->
+            <!--<option value="Python">-->
+            <!--<option value="C">-->
+            <!--<option value="C#">-->
+            <!--<option value="C++">-->
+        </datalist>
+
+        <input type="hidden" name="id" value="{{items._id}}">
+        <button type="submit">Ajouter un tag</button>
+
     </form>
 
     <br />

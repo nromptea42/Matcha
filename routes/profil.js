@@ -83,9 +83,15 @@ router.get('/:id/update', requireLogin, function(req, res, next) {
     mongo.connect(url, function (err, db) {
         assert.equal(null, err);
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
-            db.close();
-            /* Check pour data en formulaire + bouton vers route 'update' */
-            res.render('profil', {items: cursor, check: false});
+            var tab_tags = [];
+            var tags = db.collection('tags').find();
+            tags.forEach(function (doc, err) {
+                tab_tags.push(doc.name);
+            }, function () {
+                db.close();
+                /* Check pour data en formulaire + bouton vers route 'update' */
+                res.render('profil', {items: cursor, check: false, tab_tags: tab_tags});
+            });
         });
     });
 });
@@ -99,24 +105,11 @@ router.post('/update', requireLogin, function(req, res, next) {
         sexe: req.body.sexe,
         need: req.body.need,
         bio: req.body.bio,
-        tags_str: "",
-        tags: [],
         ville: "",
         location: { type: "Point", coordinates: [] }
     };
     if (!item.need)
         item.need = "Les deux";
-
-    var str = req.body.tags;
-    var split = str.split(" ");
-    console.log(split);
-    var i = 0;
-    while (split[i]) {
-        split[i] = "#" + split[i];
-        i++;
-    }
-    item.tags = split;
-    item.tags_str = req.body.tags;
     var id = req.body.id;
     check = "yes";
 
@@ -196,6 +189,47 @@ router.post('/add_photo', upload.single('photo'), function(req, res, next) {
         }
     }
     res.redirect('/profil/' + req.body.id);
+});
+
+router.post('/tags', requireLogin, function(req,res, next) {
+    var item = {
+        name: ""
+    };
+
+    var check = false;
+    if (req.body.tags) {
+        mongo.connect(url, function (err, db) {
+            assert.equal(null, err);
+            db.collection('user-data').findOne({_id: objectId(req.body.id)}).then(function (user) {
+                var thing = {
+                    tags: user.tags
+                };
+                var cursor = db.collection('tags').find();
+                cursor.forEach(function (doc, err) {
+                    if (req.body.tags == doc.name)
+                        check = true;
+                }, function () {
+                    if (!check) {
+                        item.name = req.body.tags;
+                        db.collection('tags').insertOne(item, function (err, result) {
+                            assert.equal(null, err);
+                            console.log('Item inserted');
+                            db.close();
+                        });
+                    }
+                    thing.tags.push(req.body.tags);
+                    db.collection('user-data').updateOne({"_id": objectId(req.body.id)}, {$set: thing}, function (err, result) {
+                        assert.equal(null, err);
+                        console.log('Item updated');
+                        db.close();
+                    });
+                    res.redirect('/profil/' + req.body.id + "/update");
+                });
+            });
+        });
+    }
+    else
+        res.redirect('/profil/' + req.body.id);
 });
 
 module.exports = router;
