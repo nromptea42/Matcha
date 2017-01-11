@@ -31,7 +31,7 @@ function requireLogin (req, res, next) {
     } else {
         next();
     }
-};
+}
 
 function get_index(req, res, sort) {
     var resultArray = [];
@@ -188,7 +188,7 @@ function get_tags(req, res, str, sort) {
                 if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
                     var i = 0;
                     var nb = 0;
-                    var tag_split = doc.tags_str.split(" ");
+                    var tag_split = doc.tags;
                     // console.log(tag_split);
                     while (splited[i]) {
                         var j = 0;
@@ -242,7 +242,7 @@ function get_tags(req, res, str, sort) {
                 if (String(doc._id) != String(req.session.user._id)) {
                     var i = 0;
                     var nb = 0;
-                    var tag_split = doc.tags_str.split(" ");
+                    var tag_split = doc.tags;
                     // console.log(tag_split);
                     while (splited[i]) {
                         var j = 0;
@@ -359,7 +359,7 @@ function get_region(req, res, zip, sort) {
 }
 
 function tags_sort(req, res, sort, age_min, age_max, yes, coord) {
-    splited = req.session.user.tags_str.split(" ");
+    splited = req.session.user.tags;
 
     var resultArray = [];
 
@@ -385,7 +385,7 @@ function tags_sort(req, res, sort, age_min, age_max, yes, coord) {
                 if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
                     var i = 0;
                     var nb = 0;
-                    var tag_split = doc.tags_str.split(" ");
+                    var tag_split = doc.tags;
                     // console.log(tag_split);
                     while (splited[i]) {
                         var j = 0;
@@ -464,7 +464,7 @@ function tags_sort(req, res, sort, age_min, age_max, yes, coord) {
                 if (String(doc._id) != String(req.session.user._id)) {
                     var i = 0;
                     var nb = 0;
-                    var tag_split = doc.tags_str.split(" ");
+                    var tag_split = doc.tags;
                     // console.log(tag_split);
                     while (splited[i]) {
                         var j = 0;
@@ -556,7 +556,7 @@ function recherche(req, res, sort, tags, age_min, age_max, zip) {
                         if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
                             var i = 0;
                             var nb = 0;
-                            var tag_split = doc.tags_str.split(" ");
+                            var tag_split = doc.tags;
                             while (splited[i]) {
                                 var j = 0;
                                 while (tag_split[j]) {
@@ -604,11 +604,12 @@ function recherche(req, res, sort, tags, age_min, age_max, zip) {
 
                         if (!newTab[0])
                             res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
-                        else
+                        else {
                             res.render('filtred', {
                                 items: newTab,
                                 which: "recherche " + age_min + " " + age_max + " " + zip + " " + tags
                             });
+                        }
                     });
                 });
             });
@@ -645,7 +646,7 @@ function recherche(req, res, sort, tags, age_min, age_max, zip) {
                         if (String(doc._id) != String(req.session.user._id)) {
                             var i = 0;
                             var nb = 0;
-                            var tag_split = doc.tags_str.split(" ");
+                            var tag_split = doc.tags;
                             while (splited[i]) {
                                 var j = 0;
                                 while (tag_split[j]) {
@@ -693,11 +694,12 @@ function recherche(req, res, sort, tags, age_min, age_max, zip) {
 
                         if (!newTab[0])
                             res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
-                        else
+                        else {
                             res.render('filtred', {
                                 items: newTab,
                                 which: "recherche " + age_min + " " + age_max + " " + zip + " " + tags
                             });
+                        }
                     });
                 });
             });
@@ -802,19 +804,15 @@ router.post('/tags', function(req, res, next) {
             });
     }
     else if (array[0] == "recherche") {
-        len = array.length;
-        i = 4;
+        i = 0;
         str = "";
-        while (array[i]) {
-            if (i == len - 1)
-                str = str + array[i] + " ";
-            else
-                str = str + array[i] + " ";
+        while (req.session.user.tags[i]) {
+            str = str + req.session.user.tags[i] + " ";
             i++;
         }
         trim = S(str).trim().s;
         console.log(trim);
-        recherche(req, res, sort, req.session.user.tags_str, array[1], array[2], array[3]);
+        recherche(req, res, sort, trim, array[1], array[2], array[3]);
     }
     else
         res.redirect('/');

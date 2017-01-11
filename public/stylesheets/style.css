@@ -30,3 +30,8 @@
 .title {
     font-size: 3em;
 }
+
+.del_tags {
+    width: 13px;
+    height: auto;
+}

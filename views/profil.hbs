@@ -69,6 +69,16 @@
         <button type="submit">Update profil</button>
     </form><br />
 
+    <h5>Supprimer vos tags :</h5>
+
+    {{#each items.tags }}
+        <form method="post" action="/profil/del_tags">
+            {{this}}
+            <input type="hidden" name="tag" value="{{this}}">
+            <input type="image" src="http://www.icône.com/images/icones/2/6/checkmark.png" alt="Submit Form" class="del_tags" />
+        </form>
+    {{/each}}
+
     <form action="/profil/tags" method="post">
 
         <div class="input">
@@ -80,18 +90,6 @@
             {{#each tab_tags}}
                 <option value="{{this}}"></option>
             {{/each}}
-            <!--<option value="HTML">-->
-            <!--<option value="CSS">-->
-            <!--<option value="JavaScript">-->
-            <!--<option value="Java">-->
-            <!--<option value="Ruby">-->
-            <!--<option value="PHP">-->
-            <!--<option value="Go">-->
-            <!--<option value="Erlang">-->
-            <!--<option value="Python">-->
-            <!--<option value="C">-->
-            <!--<option value="C#">-->
-            <!--<option value="C++">-->
         </datalist>
 
         <input type="hidden" name="id" value="{{items._id}}">

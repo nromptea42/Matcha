@@ -232,4 +232,24 @@ router.post('/tags', requireLogin, function(req,res, next) {
         res.redirect('/profil/' + req.body.id);
 });
 
+router.post('/del_tags', requireLogin, function(req, res, next) {
+    mongo.connect(url, function (err, db) {
+        assert.equal(null, err);
+        db.collection('user-data').findOne({_id: objectId(req.session.user._id)}).then(function (user) {
+            var thing = {
+                tags: user.tags
+            };
+            var index = thing.tags.indexOf(req.body.tag);
+            if (index > -1)
+                thing.tags.splice(index, 1);
+            db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)}, {$set: thing}, function (err, result) {
+                assert.equal(null, err);
+                console.log('Item updated');
+                db.close();
+            });
+            res.redirect('/profil/' + req.session.user._id + "/update");
+        });
+    });
+});
+
 module.exports = router;

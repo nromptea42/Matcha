@@ -206,7 +206,7 @@ router.post('/tags', function(req, res, next) {
                 if (String(doc._id) != String(req.session.user._id)) {
                     var i = 0;
                     var nb = 0;
-                    var tag_split = doc.tags_str.split(" ");
+                    var tag_split = doc.tags;
                     // console.log(tag_split);
                     while (splited[i]) {
                         var j = 0;
@@ -275,7 +275,7 @@ router.post('/tags', function(req, res, next) {
                 if (String(doc._id) != String(req.session.user._id)) {
                     var i = 0;
                     var nb = 0;
-                    var tag_split = doc.tags_str.split(" ");
+                    var tag_split = doc.tags;
                     // console.log(tag_split);
                     while (splited[i]) {
                         var j = 0;

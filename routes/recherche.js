@@ -40,7 +40,7 @@ router.get('/', requireLogin, function(req, res, next) {
 });
 
 router.post('/things', requireLogin, function(req, res, next) {
-    if (!req.body.age_min || !req.body.age_max || !req.body.zip || !req.body.popu_min || !req.body.popu_max|| !req.body.tags)
+    if (!req.body.age_min || !req.body.age_max || !req.body.zip || !req.body.popu_min || !req.body.popu_max || !req.body.tags)
         res.render('recherche', {msg: "Tous les champs doivent etre rempli"});
     else {
         if (Number.isInteger(Number(req.body.age_min)) && Number.isInteger(Number(req.body.age_max))
@@ -72,7 +72,7 @@ router.post('/things', requireLogin, function(req, res, next) {
                                 if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
                                     var i = 0;
                                     var nb = 0;
-                                    var tag_split = doc.tags_str.split(" ");
+                                    var tag_split = doc.tags;
                                     // console.log(tag_split);
                                     while (splited[i]) {
                                         var j = 0;
