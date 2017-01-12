@@ -43,7 +43,7 @@ app.use(session({
   cookieName: 'session',
   secret: 'ptdr jrigole hehe',
   duration: 60 * 60 * 1000,
-  activeDuration: 10 * 60 * 1000
+  activeDuration: 30 * 60 * 1000
 }));
 
 app.use(function(req, res, next) {
@@ -97,7 +97,22 @@ io.on('connection', function(client) {
   // console.log(client);
   client.on('chat message', function(msg) {
     console.log(msg);
-    io.emit(msg.exp + msg.dest, escape(msg.msg));
+    if (msg.msg && msg.exp && msg.dest) {
+        io.emit(msg.exp + msg.dest, escape(msg.msg));
+        mongo.connect(url, function (err, db) {
+            var new_item = {
+                message: msg.msg,
+                expe: msg.exp,
+                desti: msg.dest,
+                name: msg.name
+            };
+            db.collection('messages').insertOne(new_item, function (err, result) {
+                assert.equal(null, err);
+                console.log('Item inserted');
+                db.close();
+            });
+        });
+    }
   });
 });
 

@@ -1,8 +1,14 @@
-<div id="messages"></div>
+<div id="messages">
+    {{#each message}}
+        <p>{{this.n}}: {{this.m}}</p>
+    {{/each}}
+</div>
 <form action="">
     <input id="m" autocomplete="off" />
     <input type="hidden" id="exp" value="{{exp}}" name="exp" />
     <input type="hidden" id="dest" value="{{dest}}" name="dest" />
+    <input type="hidden" id="name" value="{{name}}" name="name" />
+    <input type="hidden" id="name_dest" value="{{name_dest}}" name="name_dest" />
     <button class="btn waves-effect waves-light" type="submit">Send</button>
 </form>
 
@@ -11,17 +17,17 @@
 <script>
     var socket = io();
     $('form').submit(function(){
-        socket.emit('chat message',{msg: $('#m').val(), exp: $('#exp').val(), dest: $('#dest').val() });
+        socket.emit('chat message',{msg: $('#m').val(), exp: $('#exp').val(), dest: $('#dest').val(), name: $('#name').val() });
         $('#m').val('');
         return false;
     });
     socket.on($('#exp').val() + $('#dest').val(), function(msg){
-        $('#messages').append('<p> Me : ' + msg + '</p>');
+        $('#messages').append('<p>' + $('#name').val() + ': ' + msg + '</p>');
         var len = $('#messages > p').length;
         $('#messages').scrollTop(len * 100);
     });
     socket.on($('#dest').val() + $('#exp').val(), function(msg){
-        $('#messages').append('<p> It : ' + msg + '</p>');
+        $('#messages').append('<p>' + $('#name_dest').val() + ': ' + msg + '</p>');
         var len = $('#messages > p').length;
         $('#messages').scrollTop(len * 100);
     });

@@ -42,7 +42,7 @@ router.get('/', requireLogin, function(req, res, next) {
                 }
         }, function () {
             db.close();
-            console.log(match);
+            // console.log(match);
             res.render('matched', {match: match});
         });
     });
@@ -60,8 +60,17 @@ router.get('/:id', requireLogin, function(req, res, next) {
     mongo.connect(url, function (err, db) {
         assert.equal(null, err);
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
-            db.close();
-            res.render('message', {exp: req.session.user._id, dest: cursor._id});
+            var datas = db.collection('messages').find({
+                "expe": {$in: [String(req.session.user._id), String(cursor._id)]},
+                "desti": {$in: [String(req.session.user._id), String(cursor._id)]}
+            });
+            var tab_msg = [];
+            datas.forEach(function (doc, err) {
+                tab_msg.push({m: doc.message, n: doc.name});
+            }, function () {
+                db.close();
+                res.render('message', {exp: req.session.user._id, dest: cursor._id, message: tab_msg, name: req.session.user.prenom, name_dest: cursor.prenom});
+            });
         });
     });
 });
