@@ -26,12 +26,11 @@ router.get('/', requireLogin, function(req, res, next) {
 });
 
 router.get('/:id', requireLogin, function(req, res, next) {
-    console.log("id");
     mongo.connect(url, function (err, db) {
         assert.equal(null, err);
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
             db.close();
-            res.render('visit', {items: cursor});
+            res.render('visit', {items: cursor, me: req.session.user._id});
         });
     });
 });

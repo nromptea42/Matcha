@@ -114,6 +114,10 @@ io.on('connection', function(client) {
         });
     }
   });
+
+  client.on('new visit', function(obj) {
+      io.emit(obj.dest, "You've got a new visit");
+  });
 });
 
 module.exports = {app: app, server: server};

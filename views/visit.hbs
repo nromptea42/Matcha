@@ -17,6 +17,20 @@
     {{/each}}
 </div>
 <form action="/visit/like" method="post">
-    <input type="hidden" name="id" value="{{ items._id }}">
+    <input type="hidden" id="me" name="me" value="{{ me }}">
+    <input type="hidden" id="id" name="id" value="{{ items._id }}">
     <button type="submit">Oui</button>
 </form>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    var socket = io();
+    window.onload = function() {
+        var obj = {
+            dest: $('#id').val(),
+            from: $('#me').val()
+        };
+        socket.emit('new visit', {obj});
+    };
+</script>
