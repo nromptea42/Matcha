@@ -94,7 +94,11 @@ app.use(function(err, req, res, next) {
 });
 
 io.on('connection', function(client) {
-  // console.log(client);
+  var users = [];
+  client.on('connection', function(id) {
+     console.log(id);
+  });
+
   client.on('chat message', function(msg) {
     console.log(msg);
     if (msg.msg && msg.exp && msg.dest) {

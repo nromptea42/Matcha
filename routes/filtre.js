@@ -124,33 +124,39 @@ router.post('/region', function(req, res, next) {
             }, function (resp) {
                 resp.on('data', function (maps_infos) {
                     var y = JSON.parse(maps_infos);
-                    // console.log(y);
-                    console.log(Number(y.results[0].geometry.location.lat));
-                    console.log(Number(y.results[0].geometry.location.lng));
-                    var cursor = db.collection('user-data').find({
-                        sexe: req.session.user.need,
-                        "location": { $near: { $geometry:
-                        {
-                            type:"Point",
-                            coordinates:[Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
-                        },
-                            $maxDistance:30000}}
-                    }).sort({_id: -1});
-                    cursor.forEach(function (doc, err) {
-                        assert.equal(null, err);
-                        if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
-                            resultArray.push(doc);
-                        }
-                    }, function () {
+                    if (y.status == "OK") {
+                        console.log(Number(y.results[0].geometry.location.lat));
+                        console.log(Number(y.results[0].geometry.location.lng));
+                        var cursor = db.collection('user-data').find({
+                            sexe: req.session.user.need,
+                            "location": {
+                                $near: {
+                                    $geometry: {
+                                        type: "Point",
+                                        coordinates: [Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
+                                    },
+                                    $maxDistance: 30000
+                                }
+                            }
+                        }).sort({_id: -1});
+                        cursor.forEach(function (doc, err) {
+                            assert.equal(null, err);
+                            if ((String(doc._id) != String(req.session.user._id)) && (doc.need == req.session.user.sexe)) {
+                                resultArray.push(doc);
+                            }
+                        }, function () {
                             db.close();
                             if (!resultArray[0])
                                 res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                             else
                                 res.render('filtred', {items: resultArray, which: "region " + req.body.zip});
                         });
-                    });
+                    }
+                    else
+                        res.render('filtre');
                 });
             });
+        });
     }
     else  {
         mongo.connect(url, function (err, db) {

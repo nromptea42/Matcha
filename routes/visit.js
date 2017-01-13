@@ -30,37 +30,43 @@ router.get('/:id', requireLogin, function(req, res, next) {
         assert.equal(null, err);
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
             db.close();
-            res.render('visit', {items: cursor, me: req.session.user._id});
+            if (req.session.user.src_img[0] != "https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png")
+                res.render('visit', {items: cursor, me: req.session.user._id});
+            else
+                res.render('visit', {items: cursor, me: req.session._id, nop: "Ajoutez une image pour pouvoir like"});
         });
     });
 });
 
 router.post('/like', requireLogin, function(req, res, next) {
     // console.log(req.body.id);
-    var i = 0;
-    var item = {
-        liked: req.session.user.liked
-    };
-    var check = true;
+    if (req.session.user.src_img[0] != "https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png") {
+        var i = 0;
+        var item = {
+            liked: req.session.user.liked
+        };
+        var check = true;
 
-    while(item.liked[i])
-    {
-        if (item.liked[i] == req.body.id)
-            check = false;
-        i++;
-    }
-    console.log(item.liked);
-    if (check) {
-        item.liked.push(req.body.id);
-        mongo.connect(url, function (err, db) {
-            assert.equal(null, err);
-            db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)}, {$set: item}, function (err, result) {
+        while (item.liked[i]) {
+            if (item.liked[i] == req.body.id)
+                check = false;
+            i++;
+        }
+        console.log(item.liked);
+        if (check) {
+            item.liked.push(req.body.id);
+            mongo.connect(url, function (err, db) {
                 assert.equal(null, err);
-                console.log('Item updated');
-                db.close();
-                res.redirect('/visit/' + req.body.id);
+                db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)}, {$set: item}, function (err, result) {
+                    assert.equal(null, err);
+                    console.log('Item updated');
+                    db.close();
+                    res.redirect('/visit/' + req.body.id);
+                });
             });
-        });
+        }
+        else
+            res.redirect('/visit/' + req.body.id);
     }
     else
         res.redirect('/visit/' + req.body.id);

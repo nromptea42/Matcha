@@ -43,12 +43,8 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    var socket = io.connect('http://localhost:8000');
-
-    socket.emit("msg", "bonjour oui je suis le pain");
-
-    socket.on('news', function (data) {
-//        alert(data);
-//        socket.emit('my other event', { my: 'data' });
-    });
+    var socket = io();
+    window.onload = function() {
+        socket.emit('connection', req.session.user._id);
+    };
 </script>

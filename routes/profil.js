@@ -126,29 +126,31 @@ router.post('/update', requireLogin, function(req, res, next) {
         'path': '/maps/api/geocode/json?address=' + item.ville + ",%20France"}, function(resp) {
         resp.on('data', function(maps_infos) {
             var y = JSON.parse(maps_infos);
-            // console.log(y);
-            // console.log(y.results[0].address_components[0].long_name);
-            if (item.ville) {
-                if (check == "no")
-                    item.ville = "";
-                else
-                    item.ville = y.results[0].address_components[0].long_name;
-                item.location.coordinates = [Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
-            }
-
-            if (!isNaN(item.age)) {
-                if (Number(item.age) >= 18) {
-                    mongo.connect(url, function (err, db) {
-                        assert.equal(null, err);
-                        db.collection('user-data').updateOne({"_id": objectId(id)}, {$set: item}, function (err, result) {
-                            assert.equal(null, err);
-                            console.log('Item updated');
-                            db.close();
-                        });
-                    });
+            if (y.status == "OK") {
+                if (item.ville) {
+                    if (check == "no")
+                        item.ville = "";
+                    else
+                        item.ville = y.results[0].address_components[0].long_name;
+                    item.location.coordinates = [Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
                 }
+
+                if (!isNaN(item.age)) {
+                    if (Number(item.age) >= 18) {
+                        mongo.connect(url, function (err, db) {
+                            assert.equal(null, err);
+                            db.collection('user-data').updateOne({"_id": objectId(id)}, {$set: item}, function (err, result) {
+                                assert.equal(null, err);
+                                console.log('Item updated');
+                                db.close();
+                            });
+                        });
+                    }
+                }
+                res.redirect('/profil/' + id);
             }
-            res.redirect('/profil/' + id);
+            else
+                res.redirect('/profil/' + id + "/update");
         });
     });
 });
