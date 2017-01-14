@@ -33,7 +33,7 @@ router.get('/:id', requireLogin, function(req, res, next) {
             if (req.session.user.src_img[0] != "https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png")
                 res.render('visit', {items: cursor, me: req.session.user._id});
             else
-                res.render('visit', {items: cursor, me: req.session._id, nop: "Ajoutez une image pour pouvoir like"});
+                res.render('visit', {items: cursor, me: req.session.user._id, nop: "Ajoutez une image pour pouvoir like"});
         });
     });
 });

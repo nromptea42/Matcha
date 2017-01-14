@@ -230,4 +230,9 @@ router.post('/email', function(req, res, next) {
    res.render('forgot');
 });
 
+router.get('/getId', function(req, res, next) {
+    // console.log(req.session.user);
+    res.send(req.session.user);
+});
+
 module.exports = router;

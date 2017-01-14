@@ -120,7 +120,8 @@ io.on('connection', function(client) {
   });
 
   client.on('new visit', function(obj) {
-      io.emit(obj.dest, "You've got a new visit");
+      console.log(obj);
+      io.emit(obj.dest, {msg: "You've got a new visit from " + obj.from});
   });
 });
 

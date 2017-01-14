@@ -35,10 +35,26 @@
 </body>
 </html>
 
+<script src="/socket.io/socket.io.js"></script>
+
 <script>
     function sendToast () {
         var msg = Number(document.getElementById("newbadge").textContent) + 1;
         console.log(msg);
         document.getElementById("newbadge").textContent=String(msg);
     }
+    var socket = io();
+    var xir;
+    $.ajax({
+       'method'     : 'GET',
+        'url'       : '/getId',
+        'success'   : function(data){
+            xir = data._id;
+            console.log(xir);
+            socket.on(xir, function(msg) {
+                Materialize.toast('I am a toast', 4000,'',sendToast())
+                console.log(msg.msg);
+            });
+        }
+    });
 </script>

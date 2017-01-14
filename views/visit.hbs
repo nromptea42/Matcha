@@ -29,10 +29,6 @@
 <script>
     var socket = io();
     window.onload = function() {
-        var obj = {
-            dest: $('#id').val(),
-            from: $('#me').val()
-        };
-        socket.emit('new visit', {obj});
+        socket.emit('new visit', {dest: $('#id').val(), from: $('#me').val()});
     };
 </script>
