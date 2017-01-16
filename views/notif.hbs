@@ -1,7 +1,12 @@
+{{#each notifs}}
+    Heeeey
+{{/each}}
+
 <script>
-    window.onload = function() {
+
+    setTimeout(function() {
         var o = Number(document.getElementById("newbadge").textContent);
-        console.log(o);
-        console.log(typeof o);
-    };
+        document.getElementById("newbadge").textContent="0";
+    }, 1000); // 3 seconds
+
 </script>
