@@ -19,7 +19,8 @@
 <br />
 {{nop}}
 <form action="/visit/like" method="post">
-    <input type="hidden" id="me" name="me" value="{{ me }}">
+    <input type="hidden" id="name" name="name" value="{{ me.prenom }}">
+    <input type="hidden" id="me" name="me" value="{{ me._id }}">
     <input type="hidden" id="id" name="id" value="{{ items._id }}">
     <button type="submit">Oui</button>
 </form>
@@ -29,6 +30,6 @@
 <script>
     var socket = io();
     window.onload = function() {
-        socket.emit('new visit', {dest: $('#id').val(), from: $('#me').val()});
+        socket.emit('new visit', {dest: $('#id').val(), from: $('#me').val(), name: $('#name').val()});
     };
 </script>

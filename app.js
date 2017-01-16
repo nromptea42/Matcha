@@ -20,6 +20,7 @@ var tri = require('./routes/tri');
 var recherche = require('./routes/recherche');
 var visit = require('./routes/visit');
 var message = require('./routes/message');
+var notif = require('./routes/notif');
 
 var session = require('client-sessions');
 var app = express();
@@ -61,6 +62,7 @@ app.use('/tri', tri);
 app.use('/recherche', recherche);
 app.use('/visit', visit);
 app.use('/message', message);
+app.use('/notif', notif);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -120,8 +122,24 @@ io.on('connection', function(client) {
   });
 
   client.on('new visit', function(obj) {
-      console.log(obj);
-      io.emit(obj.dest, {msg: "You've got a new visit from " + obj.from});
+      if (obj.dest && obj.from && obj.name) {
+          io.emit(obj.dest, {msg: "Votres profil a ete visite par " + obj.name});
+          mongo.connect(url, function (err, db) {
+              var new_item = {
+                  message: "Votres profil a ete visite par " + obj.name,
+                  expe: obj.from,
+                  desti: obj.dest
+              };
+              db.collection('notifs').insertOne(new_item, function (err, result) {
+                  assert.equal(null, err);
+                  console.log('Item inserted');
+                  db.close();
+              });
+              db.collection('user-data').updateOne({"_id": objectId(obj.dest)}, {$inc: {nb_notif: 1}}, function (err, result) {
+                  console.log("oui");
+              });
+          });
+      }
   });
 });
 

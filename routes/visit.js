@@ -31,9 +31,9 @@ router.get('/:id', requireLogin, function(req, res, next) {
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
             db.close();
             if (req.session.user.src_img[0] != "https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png")
-                res.render('visit', {items: cursor, me: req.session.user._id});
+                res.render('visit', {items: cursor, me: req.session.user});
             else
-                res.render('visit', {items: cursor, me: req.session.user._id, nop: "Ajoutez une image pour pouvoir like"});
+                res.render('visit', {items: cursor, me: req.session.user, nop: "Ajoutez une image pour pouvoir like"});
         });
     });
 });

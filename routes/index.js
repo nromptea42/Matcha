@@ -231,8 +231,8 @@ router.post('/email', function(req, res, next) {
 });
 
 router.get('/getId', function(req, res, next) {
-    // console.log(req.session.user);
-    res.send(req.session.user);
+    if (req.session.user)
+        res.send(req.session.user);
 });
 
 module.exports = router;

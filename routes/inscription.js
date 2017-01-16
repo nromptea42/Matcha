@@ -62,7 +62,8 @@ router.post('/insert', function(req, res, next) {
         bio: "",
         tags: [],
         ville: "",
-        liked: []
+        liked: [],
+        nb_notif: 0
     };
     var msg = [];
     var mdp = req.body.mdp;

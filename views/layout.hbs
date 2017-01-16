@@ -15,7 +15,7 @@
         <div class="nav-wrapper">
             <a href="/" class="left title">Oui</a>
             <ul class="right">
-                <li><a href="#!">Notifications<span id="newbadge" class="new badge">0</span></a></li>
+                <li><a href="/notif">Notifications<span id="newbadge" class="new badge">0</span></a></li>
                 <li><a href="/message">Message</a></li>
                 <li><a href="/profil">Profil</a></li>
                 <li><a href="/inscription">Inscription</a></li>
@@ -25,8 +25,6 @@
         </div>
     </nav>
 </div>
-
-<a class="btn" onclick="Materialize.toast('I am a toast', 4000,'',sendToast())">Toast!</a>
 
 <body  class="padding">
     <div class="container">
@@ -40,7 +38,6 @@
 <script>
     function sendToast () {
         var msg = Number(document.getElementById("newbadge").textContent) + 1;
-        console.log(msg);
         document.getElementById("newbadge").textContent=String(msg);
     }
     var socket = io();
@@ -50,11 +47,17 @@
         'url'       : '/getId',
         'success'   : function(data){
             xir = data._id;
-            console.log(xir);
             socket.on(xir, function(msg) {
-                Materialize.toast('I am a toast', 4000,'',sendToast())
-                console.log(msg.msg);
+                Materialize.toast(msg.msg, 6000,'',sendToast());
             });
+        }
+    });
+    $.ajax({
+       'method' : 'GET',
+        'url'   : '/getId',
+        'success' : function (data) {
+//           console.log(data);
+           document.getElementById("newbadge").textContent=String(data.nb_notif);
         }
     });
 </script>
