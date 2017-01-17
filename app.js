@@ -135,8 +135,29 @@ io.on('connection', function(client) {
                   console.log('Item inserted');
                   db.close();
               });
-              db.collection('user-data').updateOne({"_id": objectId(obj.dest)}, {$inc: {nb_notif: 1}}, function (err, result) {
-                  console.log("oui");
+              db.collection('user-data').updateOne({"_id": objectId(obj.dest)}, {$inc: {nb_notif: 1, popu: 1}}, function (err, result) {
+                  // console.log("oui");
+              });
+          });
+      }
+  });
+
+  client.on('new like', function(obj) {
+      if (obj.dest && obj.from && obj.name) {
+          io.emit(obj.dest, {msg: "Vous avez ete like par " + obj.name});
+          mongo.connect(url, function (err, db) {
+              var new_item = {
+                  message: "Vous avez ete like par " + obj.name,
+                  expe: obj.from,
+                  desti: obj.dest
+              };
+              db.collection('notifs').insertOne(new_item, function (err, result) {
+                  assert.equal(null, err);
+                  console.log('Item inserted');
+                  db.close();
+              });
+              db.collection('user-data').updateOne({"_id": objectId(obj.dest)}, {$inc: {nb_notif: 1, popu: 5}}, function (err, result) {
+                  // console.log("oui");
               });
           });
       }

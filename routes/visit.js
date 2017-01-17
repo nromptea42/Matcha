@@ -47,11 +47,21 @@ router.post('/like', requireLogin, function(req, res, next) {
         };
         var check = true;
 
-        while (item.liked[i]) {
-            if (item.liked[i] == req.body.id)
-                check = false;
-            i++;
+        if (item.liked.indexOf(req.body.id != -1)) {
+            check = false;
         }
+
+        mongo.connect(url, function (err, db) {
+            db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)}, {$set: item}, function (err, result) {
+                assert.equal(null, err);
+            });
+        });
+
+        // while (item.liked[i]) {
+        //     if (item.liked[i] == req.body.id)
+        //         check = false;
+        //     i++;
+        // }
         console.log(item.liked);
         if (check) {
             item.liked.push(req.body.id);

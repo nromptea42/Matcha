@@ -340,4 +340,80 @@ router.post('/tags', function(req, res, next) {
     }
 });
 
+router.post('/popularite', function(req, res, next) {
+    console.log(req.body.popu_min);
+    console.log(req.body.popu_max);
+
+    var resultArray = [];
+
+    if (req.body.popu_min <= req.body.popu_max) {
+        if (req.session.user.need != "Les deux") {
+            mongo.connect(url, function (err, db) {
+                assert.equal(null, err);
+
+                var cursor = db.collection('user-data').find({
+                    sexe: req.session.user.need,
+                    "popu": {"$gte": Number(req.body.popu_min), "$lte": Number(req.body.popu_max)},
+                    "location": { $near: { $geometry:
+                        {
+                            type:"Point",
+                            coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                        },
+                        $maxDistance:30000}}
+                }).sort();
+                cursor.forEach(function (doc, err) {
+                    assert.equal(null, err);
+                    console.log("coucou");
+                    if (String(doc._id) != String(req.session.user._id)) {
+                        resultArray.push(doc);
+                    }
+                }, function () {
+                    db.close();
+                    console.log(resultArray);
+                    if (!resultArray[0])
+                        res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
+                    else
+                        res.render('filtred', {
+                            items: resultArray,
+                            which: "popu " + req.body.popu_min + " " + req.body.popu_max
+                        });
+                });
+            });
+        }
+        else {
+            mongo.connect(url, function (err, db) {
+                assert.equal(null, err);
+
+                var cursor = db.collection('user-data').find({
+                    "need" : {$in: ["Les deux", req.session.user.sexe]},
+                    "popu": {"$gte": String(req.body.popu_min), "$lte": String(req.body.popu_max)},
+                    "location": { $near: { $geometry:
+                        {
+                            type:"Point",
+                            coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                        },
+                        $maxDistance:30000}}
+                }).sort({_id: -1});
+                cursor.forEach(function (doc, err) {
+                    assert.equal(null, err);
+                    if (String(doc._id) != String(req.session.user._id)) {
+                        resultArray.push(doc);
+                    }
+                }, function () {
+                    db.close();
+                    if (!resultArray[0])
+                        res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
+                    else
+                        res.render('filtred', {items: resultArray, which: "popu "
+                        + req.body.popu_min + " "
+                        + req.body.popu_max });
+                });
+            });
+        }
+
+    }
+    else
+        res.render('filtre');
+});
+
 module.exports = router;

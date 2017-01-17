@@ -165,6 +165,78 @@ function get_age(req, res, age_min, age_max, sort) {
         res.render('filtre');
 }
 
+function get_popu(req, res, popu_min, popu_max, sort) {
+    var resultArray = [];
+
+    if (popu_min <= popu_max) {
+        if (req.session.user.need != "Les deux") {
+            mongo.connect(url, function (err, db) {
+                assert.equal(null, err);
+
+                var cursor = db.collection('user-data').find({
+                    sexe: req.session.user.need,
+                    "popu": {"$gte": Number(popu_min), "$lte": Number(popu_max)},
+                    "location": { $near: { $geometry:
+                        {
+                            type:"Point",
+                            coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                        },
+                        $maxDistance:30000}}
+                }).sort(sort);
+                cursor.forEach(function (doc, err) {
+                    assert.equal(null, err);
+                    if (String(doc._id) != String(req.session.user._id)) {
+                        resultArray.push(doc);
+                    }
+                }, function () {
+                    db.close();
+                    if (!resultArray[0])
+                        res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
+                    else
+                        res.render('filtred', {
+                            items: resultArray,
+                            which: "popu " + popu_min + " " + popu_max
+                        });
+                });
+            });
+        }
+        else {
+            mongo.connect(url, function (err, db) {
+                assert.equal(null, err);
+
+                var cursor = db.collection('user-data').find({
+                    "need" : {$in: ["Les deux", req.session.user.sexe]},
+                    "popu": {"$gte": Number(popu_min), "$lte": Number(popu_max)},
+                    "location": { $near: { $geometry:
+                        {
+                            type:"Point",
+                            coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
+                        },
+                        $maxDistance:30000}}
+                }).sort(sort);
+                cursor.forEach(function (doc, err) {
+                    assert.equal(null, err);
+                    if (String(doc._id) != String(req.session.user._id)) {
+                        resultArray.push(doc);
+                    }
+                }, function () {
+                    db.close();
+                    if (!resultArray[0])
+                        res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
+                    else
+                        res.render('filtred', {
+                            items: resultArray,
+                            which: "popu " + popu_min + " " + popu_max
+                        });
+                });
+            });
+        }
+
+    }
+    else
+        res.render('filtre');
+}
+
 function get_tags(req, res, str, sort) {
     var splited = str.split(" ");
     console.log(splited);
@@ -523,7 +595,7 @@ function tags_sort(req, res, sort, age_min, age_max, yes, coord) {
     }
 }
 
-function recherche(req, res, sort, tags, age_min, age_max, zip) {
+function recherche(req, res, sort, tags, age_min, age_max, zip, popu_min, popu_max) {
 
     if (req.session.user.need != "Les deux") {
         mongo.connect(url, function (err, db) {
@@ -745,7 +817,7 @@ router.post('/age', function(req, res, next) {
     }
     else if (array[0] == "recherche") {
         len = array.length;
-        i = 4;
+        i = 6;
         str = "";
         while (array[i]) {
             if (i == len - 1)
@@ -756,7 +828,10 @@ router.post('/age', function(req, res, next) {
         }
         trim = S(str).trim().s;
         console.log(trim);
-        recherche(req, res, sort, trim, array[1], array[2], array[3]);
+        recherche(req, res, sort, trim, array[1], array[2], array[3], array[4], array[5]);
+    }
+    else if (array[0] == "popu") {
+        get_popu(req, res, array[1], array[2], sort);
     }
     else
         res.redirect('/');
@@ -776,6 +851,9 @@ router.post('/tags', function(req, res, next) {
     }
     else if (array[0] == "age") {
         tags_sort(req, res, sort, array[1], array[2], "age " + array[1] + " " + array[2], coord);
+    }
+    else if (array[0] == "popu") {
+        tags_sort(req, res, sort, array[1], array[2], "popu " + array[1] + " " + array[2], coord);
     }
     else if (array[0] == "tags") {
         var len = array.length;
@@ -812,7 +890,7 @@ router.post('/tags', function(req, res, next) {
         }
         trim = S(str).trim().s;
         console.log(trim);
-        recherche(req, res, sort, trim, array[1], array[2], array[3]);
+        recherche(req, res, sort, trim, array[1], array[2], array[3], array[4], array[5]);
     }
     else
         res.redirect('/');
@@ -823,6 +901,59 @@ router.post('/ville', function(req, res, next) {
     var array = trim.split(" ");
     console.log(array);
     var sort = {_id: -1};
+
+    if (array[0] == "none")
+        res.redirect('/');
+    else if (array[0] == "index") {
+        get_index(req, res, sort);
+    }
+    else if (array[0] == "age") {
+        get_age(req, res, array[1], array[2], sort);
+    }
+    else if (array[0] == "popu") {
+        get_popu(req, res, array[1], array[2], sort);
+    }
+    else if (array[0] == "tags") {
+        var len = array.length;
+        var i = 1;
+        var str = "";
+        while (array[i]) {
+            if (i == len - 1)
+                str = str + array[i] + " ";
+            else
+                str = str + array[i] + " ";
+            i++;
+        }
+        trim = S(str).trim().s;
+        get_tags(req, res, trim, sort);
+    }
+    else if (array[0] == "region") {
+        get_region(req, res, array[1], sort);
+    }
+    else if (array[0] == "recherche") {
+        len = array.length;
+        i = 6;
+        str = "";
+        while (array[i]) {
+            if (i == len - 1)
+                str = str + array[i] + " ";
+            else
+                str = str + array[i] + " ";
+            i++;
+        }
+        trim = S(str).trim().s;
+        console.log(trim);
+        recherche(req, res, sort, trim, array[1], array[2], array[3], array[4], array[5]);
+    }
+    else
+        res.redirect('/');
+});
+
+router.post('/popu', function(req, res, next) {
+    var trim = S(req.body.which).trim().s;
+    var array = trim.split(" ");
+    console.log(array);
+    var sort = {popu: -1};
 
     if (array[0] == "none")
         res.redirect('/');
@@ -851,7 +982,7 @@ router.post('/ville', function(req, res, next) {
     }
     else if (array[0] == "recherche") {
         len = array.length;
-        i = 4;
+        i = 6;
         str = "";
         while (array[i]) {
             if (i == len - 1)
@@ -862,7 +993,10 @@ router.post('/ville', function(req, res, next) {
         }
         trim = S(str).trim().s;
         console.log(trim);
-        recherche(req, res, sort, trim, array[1], array[2], array[3]);
+        recherche(req, res, sort, trim, array[1], array[2], array[3], array[4], array[5]);
+    }
+    else if (array[0] == "popu") {
+        get_popu(req, res, array[1], array[2], sort);
     }
     else
         res.redirect('/');

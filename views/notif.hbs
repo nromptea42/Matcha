@@ -1,12 +1,4 @@
+<br />
 {{#each notifs}}
-    Heeeey
+    {{this.message}}<br />
 {{/each}}
-
-<script>
-
-    setTimeout(function() {
-        var o = Number(document.getElementById("newbadge").textContent);
-        document.getElementById("newbadge").textContent="0";
-    }, 1000); // 3 seconds
-
-</script>
