@@ -18,7 +18,7 @@ function requireLogin (req, res, next) {
 
 /* GET home page. */
 router.get('/', requireLogin, function(req, res, next) {
-    console.log(req.query.id);
+    // console.log(req.query.id);
     if (req.query.id)
         res.redirect('/visit/' + req.query.id);
     else
@@ -30,10 +30,18 @@ router.get('/:id', requireLogin, function(req, res, next) {
         assert.equal(null, err);
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
             db.close();
-            if (req.session.user.src_img[0] != "https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png")
-                res.render('visit', {items: cursor, me: req.session.user});
+            var str = "CE PROFIL NE TE LIKE PAS";
+            if (cursor.liked.indexOf(String(req.session.user._id)) != -1)
+                str = "CE PROFIL TE LIKE YOUHOU";
+            if (req.session.user.src_img[0] != "https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png") {
+                if (req.session.user.liked.indexOf(String(cursor._id)) != -1) {
+                    res.render('visit', {items: cursor, me: req.session.user, nop: "Vous likez deja cette personne !", liked: true, m: str});
+                }
+                else
+                    res.render('visit', {items: cursor, me: req.session.user, m: str});
+            }
             else
-                res.render('visit', {items: cursor, me: req.session.user, nop: "Ajoutez une image pour pouvoir like"});
+                res.render('visit', {items: cursor, me: req.session.user, nop: "Ajoutez une image pour pouvoir like", m: str});
         });
     });
 });
@@ -47,22 +55,23 @@ router.post('/like', requireLogin, function(req, res, next) {
         };
         var check = true;
 
-        if (item.liked.indexOf(req.body.id != -1)) {
-            check = false;
-        }
+        // if (item.liked.indexOf(req.body.id != -1)) {
+        //     check = false;
+        // }
 
         mongo.connect(url, function (err, db) {
             db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)}, {$set: item}, function (err, result) {
                 assert.equal(null, err);
             });
+            db.close();
         });
 
-        // while (item.liked[i]) {
-        //     if (item.liked[i] == req.body.id)
-        //         check = false;
-        //     i++;
-        // }
-        console.log(item.liked);
+        while (item.liked[i]) {
+            if (item.liked[i] == req.body.id)
+                check = false;
+            i++;
+        }
+        // console.log(item.liked);
         if (check) {
             item.liked.push(req.body.id);
             mongo.connect(url, function (err, db) {
@@ -81,4 +90,30 @@ router.post('/like', requireLogin, function(req, res, next) {
     else
         res.redirect('/visit/' + req.body.id);
 });
+
+router.post('/unlike', requireLogin, function(req, res, next) {
+    if (req.session.user.src_img[0] != "https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png") {
+        var item = {
+          liked: req.session.user.liked
+        };
+
+        var index = item.liked.indexOf(String(req.body.id));
+        if (index > -1)
+            item.liked.splice(index, 1);
+        console.log(item.liked);
+
+        mongo.connect(url, function (err, db) {
+            assert.equal(null, err);
+            db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)}, {$set: item}, function (err, result) {
+                assert.equal(null, err);
+                console.log('Item updated');
+                db.close();
+                res.redirect('/visit/' + req.body.id);
+            });
+        });
+    }
+    else
+        res.redirect('/visit/' + req.body.id);
+});
+
 module.exports = router;

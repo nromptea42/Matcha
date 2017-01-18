@@ -95,33 +95,53 @@ app.use(function(err, req, res, next) {
   });
 });
 
-io.on('connection', function(client) {
-  var users = [];
-  client.on('connection', function(id) {
-     console.log(id);
-  });
+var o;
 
-  client.on('chat message', function(msg) {
-    console.log(msg);
-    if (msg.msg && msg.exp && msg.dest) {
-        io.emit(msg.exp + msg.dest, escape(msg.msg));
-        mongo.connect(url, function (err, db) {
-            var new_item = {
-                message: msg.msg,
-                expe: msg.exp,
-                desti: msg.dest,
-                name: msg.name
-            };
-            db.collection('messages').insertOne(new_item, function (err, result) {
-                assert.equal(null, err);
-                console.log('Item inserted');
-                db.close();
+io.on('connection', function(client) {
+    // console.log("connection");
+    var userId;
+    clearTimeout(o);
+
+    client.on('which_user', function(id) {
+        userId = id;
+    });
+
+    client.on('disconnect', function() {
+        clearTimeout(o);
+        o = setTimeout(function() {
+            mongo.connect(url, function (err, db) {
+                var d = new Date();
+                db.collection('user-data').updateOne({"_id": objectId(userId)},
+                    {$set: {connected: false, last_date: d.toUTCString()}}, function (err, result) {
+                        console.log("deconnection");
+                });
             });
-        });
-    }
-  });
+        }, 5000); // 5 seconds
+    });
+
+    client.on('chat message', function(msg) {
+    // console.log(msg);
+        clearTimeout(o);
+        if (msg.msg && msg.exp && msg.dest) {
+            io.emit(msg.exp + msg.dest, escape(msg.msg));
+            mongo.connect(url, function (err, db) {
+                var new_item = {
+                    message: msg.msg,
+                    expe: msg.exp,
+                    desti: msg.dest,
+                    name: msg.name
+                };
+                db.collection('messages').insertOne(new_item, function (err, result) {
+                    assert.equal(null, err);
+                    // console.log('Item inserted');
+                    // db.close();
+                    });
+            });
+        }
+    });
 
   client.on('new visit', function(obj) {
+      clearTimeout(o);
       if (obj.dest && obj.from && obj.name) {
           io.emit(obj.dest, {msg: "Votres profil a ete visite par " + obj.name});
           mongo.connect(url, function (err, db) {
@@ -132,7 +152,7 @@ io.on('connection', function(client) {
               };
               db.collection('notifs').insertOne(new_item, function (err, result) {
                   assert.equal(null, err);
-                  console.log('Item inserted');
+                  // console.log('Item inserted');
                   db.close();
               });
               db.collection('user-data').updateOne({"_id": objectId(obj.dest)}, {$inc: {nb_notif: 1, popu: 1}}, function (err, result) {
@@ -143,6 +163,7 @@ io.on('connection', function(client) {
   });
 
   client.on('new like', function(obj) {
+      clearTimeout(o);
       if (obj.dest && obj.from && obj.name) {
           io.emit(obj.dest, {msg: "Vous avez ete like par " + obj.name});
           mongo.connect(url, function (err, db) {
@@ -153,7 +174,7 @@ io.on('connection', function(client) {
               };
               db.collection('notifs').insertOne(new_item, function (err, result) {
                   assert.equal(null, err);
-                  console.log('Item inserted');
+                  // console.log('Item inserted');
                   db.close();
               });
               db.collection('user-data').updateOne({"_id": objectId(obj.dest)}, {$inc: {nb_notif: 1, popu: 5}}, function (err, result) {
@@ -162,6 +183,28 @@ io.on('connection', function(client) {
           });
       }
   });
+
+    client.on('new unlike', function(obj) {
+        clearTimeout(o);
+        if (obj.dest && obj.from && obj.name) {
+            io.emit(obj.dest, {msg: "Vous avez ete unlike par " + obj.name});
+            mongo.connect(url, function (err, db) {
+                var new_item = {
+                    message: "Vous avez ete unlike par " + obj.name,
+                    expe: obj.from,
+                    desti: obj.dest
+                };
+                db.collection('notifs').insertOne(new_item, function (err, result) {
+                    assert.equal(null, err);
+                    // console.log('Item inserted');
+                    db.close();
+                });
+                db.collection('user-data').updateOne({"_id": objectId(obj.dest)}, {$inc: {nb_notif: 1, popu: -3}}, function (err, result) {
+                    // console.log("oui");
+                });
+            });
+        }
+    });
 });
 
 module.exports = {app: app, server: server};

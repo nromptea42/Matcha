@@ -10,8 +10,14 @@ var session = require('client-sessions');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    req.session.reset();
-    res.redirect('/');
+    mongo.connect(url, function (err, db) {
+        var d = new Date();
+        db.collection('user-data').updateOne({"_id": objectId(req.session.user._id)},
+            {$set: {connected: false, last_date: d.toUTCString()}}, function (err, result) {
+            req.session.reset();
+            res.redirect('/');
+        });
+    });
 });
 
 module.exports = router;

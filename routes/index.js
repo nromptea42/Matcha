@@ -85,6 +85,11 @@ function sendMail (mail, str, salt) {
 
 /* GET home page. */
 router.get('/', requireLogin, function(req, res, next) {
+    mongo.connect(url, function (err, db) {
+        db.collection('user-data').updateOne({"_id": req.session.user._id}, {$set: {connected: true}}, function (err, result) {
+            // console.log("done");
+        });
+    });
     var resultArray = [];
     // console.log(req.session.user);
     if (req.session.user.sexe) {
@@ -100,7 +105,7 @@ router.get('/', requireLogin, function(req, res, next) {
                             coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
                         },
                         $maxDistance:30000}}
-                }).sort({_id: -1});
+                }).sort({popu: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
                     if (String(doc._id) != String(req.session.user._id)) {
@@ -126,7 +131,7 @@ router.get('/', requireLogin, function(req, res, next) {
                             coordinates:[req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]]
                         },
                         $maxDistance:30000}}
-                }).sort({_id: -1});
+                }).sort({popu: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
                     if (String(doc._id) != String(req.session.user._id)) {
@@ -151,7 +156,8 @@ router.post('/login', function(req, res, next) {
     var mdp = req.body.mdp;
     var item = {
         location: { type: "Point", coordinates: [] },
-        ville: ""
+        ville: "",
+        connected: true
     };
 
     if (email && mdp) {
@@ -174,7 +180,7 @@ router.post('/login', function(req, res, next) {
                                     }, function (resp) {
                                         resp.on('data', function (infos) {
                                             var x = JSON.parse(infos);
-                                            console.log(x);
+                                            // console.log(x);
                                             if (req.body.long != "none" && req.body.lat != "none")
                                                 item.location.coordinates = [Number(req.body.long), Number(req.body.lat)];
                                             else

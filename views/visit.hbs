@@ -3,6 +3,12 @@
 {{#each items.src_img}}
     <img class="photo" src="{{this}}">
 {{/each}}
+<div>{{#if items.connected}}
+    CONNECTED
+{{else}}
+    DISCONNECTED since {{items.last_date}}
+{{/if}}</div>
+<div>{{m}}</div>
 <div>Id: {{ items._id }}</div>
 <div>Score de popularite : {{items.popu}}</div>
 <div>Nom : {{items.nom}}</div>
@@ -18,13 +24,27 @@
     {{/each}}
 </div>
 <br />
-{{nop}}
-<form action="/visit/like" method="post">
+{{#if nop}}
+    {{#if liked}}
+        {{nop}}
+        <form id="unlike" action="/visit/unlike" method="post">
+            <input type="hidden" id="name_unlike" name="name" value="{{ me.prenom }}">
+            <input type="hidden" id="me_unlike" name="me" value="{{ me._id }}">
+            <input type="hidden" id="id_unlike" name="id" value="{{ items._id }}">
+            <button type="submit">Non</button>
+        </form>
+    {{else}}
+        {{nop}}
+    {{/if}}
+{{else}}
+<form id="like" action="/visit/like" method="post">
     <input type="hidden" id="name" name="name" value="{{ me.prenom }}">
     <input type="hidden" id="me" name="me" value="{{ me._id }}">
     <input type="hidden" id="id" name="id" value="{{ items._id }}">
     <button type="submit">Oui</button>
 </form>
+{{/if}}
+
 
 <script src="/socket.io/socket.io.js"></script>
 
@@ -32,7 +52,13 @@
     var socket = io();
     socket.emit('new visit', {dest: $('#id').val(), from: $('#me').val(), name: $('#name').val()});
 
-    $('form').submit(function() {
+    $('#like').submit(function() {
         socket.emit('new like', {dest: $('#id').val(), from: $('#me').val(), name: $('#name').val()});
+    });
+
+    $('#unlike').submit(function() {
+        socket.emit('new unlike', {dest: $('#id_unlike').val(),
+            from: $('#me_unlike').val(),
+            name: $('#name_unlike').val()});
     });
 </script>

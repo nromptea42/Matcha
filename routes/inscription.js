@@ -64,7 +64,9 @@ router.post('/insert', function(req, res, next) {
         ville: "",
         liked: [],
         nb_notif: 0,
-        popu: 0
+        popu: 0,
+        connected: false,
+        last_date: ""
     };
     var msg = [];
     var mdp = req.body.mdp;

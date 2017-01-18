@@ -58,6 +58,8 @@
         'success' : function (data) {
 //           console.log(data);
            document.getElementById("newbadge").textContent=String(data.nb_notif);
+           socket.emit('which_user', data._id);
+           console.log("salut");
         }
     });
 </script>
