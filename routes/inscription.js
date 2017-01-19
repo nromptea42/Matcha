@@ -66,7 +66,8 @@ router.post('/insert', function(req, res, next) {
         nb_notif: 0,
         popu: 0,
         connected: false,
-        last_date: ""
+        last_date: "",
+        ban: []
     };
     var msg = [];
     var mdp = req.body.mdp;

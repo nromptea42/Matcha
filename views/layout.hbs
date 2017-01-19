@@ -16,7 +16,7 @@
             <a href="/" class="left title">Oui</a>
             <ul class="right">
                 <li><a href="/notif">Notifications<span id="newbadge" class="new badge">0</span></a></li>
-                <li><a href="/message">Message</a></li>
+                <li><a href="/message">Message<span id="newbadge2" class="new badge">0</span></a></li>
                 <li><a href="/profil">Profil</a></li>
                 <li><a href="/inscription">Inscription</a></li>
                 <li><a href="/liste">Liste</a></li>
@@ -40,6 +40,10 @@
         var msg = Number(document.getElementById("newbadge").textContent) + 1;
         document.getElementById("newbadge").textContent=String(msg);
     }
+    function sendToastmsg () {
+        var msg = Number(document.getElementById("newbadge2").textContent) + 1;
+        document.getElementById("newbadge2").textContent=String(msg);
+    }
     var socket = io();
     var xir;
     $.ajax({
@@ -48,7 +52,11 @@
         'success'   : function(data){
             xir = data._id;
             socket.on(xir, function(msg) {
-                Materialize.toast(msg.msg, 6000,'',sendToast());
+                if (window.location.pathname.slice(0, 9) != "/message/") {
+                    Materialize.toast(msg.msg, 6000,'', sendToastmsg());
+                }
+                else if (!msg.chat)
+                    Materialize.toast(msg.msg, 6000,'', sendToast());
             });
         }
     });
@@ -59,7 +67,6 @@
 //           console.log(data);
            document.getElementById("newbadge").textContent=String(data.nb_notif);
            socket.emit('which_user', data._id);
-           console.log("salut");
         }
     });
 </script>
