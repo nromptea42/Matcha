@@ -35,6 +35,11 @@
         </form>
     {{else}}
         {{nop}}
+        <form id="hidden" method="post">
+            <input type="hidden" id="name" name="name" value="{{ me.prenom }}">
+            <input type="hidden" id="me" name="me" value="{{ me._id }}">
+            <input type="hidden" id="id" name="id" value="{{ items._id }}">
+        </form>
     {{/if}}
 {{else}}
 <form id="like" action="/visit/like" method="post">

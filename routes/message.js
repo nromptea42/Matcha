@@ -60,13 +60,18 @@ router.get('/go', requireLogin, function(req, res, next) {
 });
 
 router.get('/:id', requireLogin, function(req, res, next) {
+
     mongo.connect(url, function (err, db) {
         assert.equal(null, err);
         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
+
+
             if (req.session.user.liked.indexOf(String(cursor._id)) != -1
                 && req.session.user.ban.indexOf(String(cursor._id)) == -1
-                && cursor.liked.indexOf(String(req.session.user_id)) != -1
+                && cursor.liked.indexOf(String(req.session.user._id)) != -1
                 && cursor.ban.indexOf(String(req.session.user_id)) == -1) {
+
+
                 var datas = db.collection('messages').find({
                     "expe": {$in: [String(req.session.user._id), String(cursor._id)]},
                     "desti": {$in: [String(req.session.user._id), String(cursor._id)]}
