@@ -52,7 +52,7 @@
         'success'   : function(data){
             xir = data._id;
             socket.on(xir, function(msg) {
-                if (window.location.pathname.slice(0, 9) != "/message/") {
+                if (window.location.pathname.slice(0, 9) != "/message/" && msg.chat) {
                     Materialize.toast(msg.msg, 6000,'', sendToastmsg());
                 }
                 else if (!msg.chat)
@@ -66,6 +66,7 @@
         'success' : function (data) {
 //           console.log(data);
            document.getElementById("newbadge").textContent=String(data.nb_notif);
+           document.getElementById("newbadge2").textContent=String(data.nb_msg);
            socket.emit('which_user', data._id);
         }
     });

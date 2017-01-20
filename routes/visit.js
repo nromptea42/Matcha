@@ -26,35 +26,43 @@ router.get('/', requireLogin, function(req, res, next) {
 });
 
 router.get('/:id', requireLogin, function(req, res, next) {
-    if (req.session.user.ban.indexOf(req.params.id) == -1) {
+    if (req.session.user.ban.indexOf(req.params.id) == -1 && req.session.user._id != req.params.id) {
         mongo.connect(url, function (err, db) {
             assert.equal(null, err);
-            db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
-                db.close();
-                var str = "CE PROFIL NE TE LIKE PAS";
-                if (cursor.liked.indexOf(String(req.session.user._id)) != -1)
-                    str = "CE PROFIL TE LIKE YOUHOU";
-                if (req.session.user.src_img[0] != "https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png") {
-                    if (req.session.user.liked.indexOf(String(cursor._id)) != -1) {
-                        res.render('visit', {
-                            items: cursor,
-                            me: req.session.user,
-                            nop: "Vous likez deja cette personne !",
-                            liked: true,
-                            m: str
-                        });
+            if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+                db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
+                    db.close();
+                    if (cursor) {
+                        var str = "CE PROFIL NE TE LIKE PAS";
+                        if (cursor.liked.indexOf(String(req.session.user._id)) != -1)
+                            str = "CE PROFIL TE LIKE YOUHOU";
+                        if (req.session.user.src_img[0] != "https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png") {
+                            if (req.session.user.liked.indexOf(String(cursor._id)) != -1) {
+                                res.render('visit', {
+                                    items: cursor,
+                                    me: req.session.user,
+                                    nop: "Vous likez deja cette personne !",
+                                    liked: true,
+                                    m: str
+                                });
+                            }
+                            else
+                                res.render('visit', {items: cursor, me: req.session.user, m: str});
+                        }
+                        else
+                            res.render('visit', {
+                                items: cursor,
+                                me: req.session.user,
+                                nop: "Ajoutez une image pour pouvoir like",
+                                m: str
+                            });
                     }
                     else
-                        res.render('visit', {items: cursor, me: req.session.user, m: str});
-                }
-                else
-                    res.render('visit', {
-                        items: cursor,
-                        me: req.session.user,
-                        nop: "Ajoutez une image pour pouvoir like",
-                        m: str
-                    });
-            });
+                        res.redirect('/');
+                });
+            }
+            else
+                res.redirect('/');
         });
     }
     else

@@ -45,55 +45,6 @@ router.post('/delete', function(req, res, next) {
     });
 });
 
-// router.get('/profil/:id', function(req, res, next) {
-//     mongo.connect(url, function (err, db) {
-//         assert.equal(null, err);
-//         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
-//             db.close();
-//             res.render('profil', {items: cursor, check: true});
-//         });
-//     });
-// });
-
-// router.get('/profil/:id/update', function(req, res, next) {
-//     mongo.connect(url, function (err, db) {
-//         assert.equal(null, err);
-//         db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
-//             db.close();
-//             res.render('profil', {items: cursor, check: false});
-//         });
-//     });
-// });
-
-// router.post('/profil', function(req, res, next) {
-//     // if (req.body.update)
-//     //     var id = req.body.id + "/update";
-//     // else
-//         var id = req.body.id;
-//     res.redirect('/liste/profil/' + id);
-// });
-
-// router.post('/profil/update', function(req, res, next) {
-//     var item = {
-//         nom: req.body.nom,
-//         prenom: req.body.prenom,
-//         age: req.body.age,
-//         email: req.body.email
-//     };
-//     var id = req.body.id;
-//     if (!isNaN(item.age)) {
-//         if (Number(item.age) >= 18) {
-//             mongo.connect(url, function (err, db) {
-//                 assert.equal(null, err);
-//                 db.collection('user-data').updateOne({"_id": objectId(id)}, {$set: item}, function (err, result) {
-//                     assert.equal(null, err);
-//                     console.log('Item updated');
-//                     db.close();
-//                 });
-//             });
-//         }
-//     }
-//     res.render('liste');
-// });
+// ATTENTION VIRE MOI CETTE MERDE
 
 module.exports = router;

@@ -123,20 +123,24 @@ io.on('connection', function(client) {
         // console.log(msg);
         clearTimeout(o);
         if (msg.msg && msg.exp && msg.dest) {
-            // console.log(window.location.pathname);
-            io.emit(msg.dest, {msg: "Vous avez un nouveau message !", chat: "here"});
-            io.emit(msg.exp + msg.dest, escape(msg.msg));
             mongo.connect(url, function (err, db) {
-                var new_item = {
-                    message: msg.msg,
-                    expe: msg.exp,
-                    desti: msg.dest,
-                    name: msg.name
-                };
-                db.collection('messages').insertOne(new_item, function (err, result) {
-                    assert.equal(null, err);
-                    // console.log('Item inserted');
-                    // db.close();
+                db.collection('user-data').findOne({_id: objectId(msg.dest)}).then(function (cursor) {
+                    if (cursor.ban.indexOf(String(msg.exp)) == -1) {
+                        io.emit(msg.dest, {msg: "Vous avez un nouveau message !", chat: "here"});
+                        io.emit(msg.exp + msg.dest, escape(msg.msg));
+                        var new_item = {
+                            message: msg.msg,
+                            expe: msg.exp,
+                            desti: msg.dest,
+                            name: msg.name
+                        };
+                        db.collection('user-data').updateOne({"_id": objectId(msg.dest)}, {$inc: {nb_msg: 1}}, function (err, result) {
+                            assert.equal(null, err);
+                        });
+                        db.collection('messages').insertOne(new_item, function (err, result) {
+                            assert.equal(null, err);
+                        });
+                    }
                 });
             });
         }
@@ -154,8 +158,7 @@ io.on('connection', function(client) {
                 };
                 db.collection('notifs').insertOne(new_item, function (err, result) {
                     assert.equal(null, err);
-                    // console.log('Item inserted');
-                    db.close();
+                    // db.close();
                 });
                 db.collection('user-data').updateOne({"_id": objectId(obj.dest)}, {$inc: {nb_notif: 1, popu: 1}}, function (err, result) {
                     // console.log("oui");

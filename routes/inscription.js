@@ -46,7 +46,9 @@ router.get('/', requireNonLogin, function(req, res, next) {
     res.render('inscription');
 });
 
-router.post('/insert', function(req, res, next) {
+// ATTENTION ICI AU REQUIRE NON LOGIN
+
+router.post('/insert', requireNonLogin, function(req, res, next) {
     var item = {
         location: { "type": "Point", "coordinates": [2, 48] },
         nom: req.body.nom,
@@ -67,7 +69,8 @@ router.post('/insert', function(req, res, next) {
         popu: 0,
         connected: false,
         last_date: "",
-        ban: []
+        ban: [],
+        nb_msg: 0
     };
     var msg = [];
     var mdp = req.body.mdp;
