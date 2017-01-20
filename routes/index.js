@@ -238,7 +238,7 @@ router.post('/email', function(req, res, next) {
 
 // ATTENTION: ATTENTION ICI AU REQUIRE LOGIN
 
-router.get('/getId', requireLogin, function(req, res, next) {
+router.get('/getId', function(req, res, next) {
     if (req.session.user)
         res.send(req.session.user);
 });

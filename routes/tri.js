@@ -612,7 +612,7 @@ function recherche(req, res, sort, tags, age_min, age_max, zip, popu_min, popu_m
                     var cursor = db.collection('user-data').find({
                         sexe: req.session.user.need,
                         "age": {"$gte": String(age_min), "$lte": String(age_max)},
-                        // "popu"
+                        "popu": {"$gte": Number(popu_min), "$lte": Number(popu_max)},
                         "location": {
                             $near: {
                                 $geometry: {
@@ -648,38 +648,39 @@ function recherche(req, res, sort, tags, age_min, age_max, zip, popu_min, popu_m
                         db.close();
                         len = resultArray.length;
                         var tmp;
-
-                        while (len - 1 > 0) {
-                            var k = 0;
-                            while (resultArray[k + 1]) {
-                                if (resultArray[k].nb_match < resultArray[k + 1].nb_match) {
-                                    tmp = resultArray[k];
-                                    resultArray[k] = resultArray[k + 1];
-                                    resultArray[k + 1] = tmp;
+                        if (tags) {
+                            while (len - 1 > 0) {
+                                var k = 0;
+                                while (resultArray[k + 1]) {
+                                    if (resultArray[k].nb_match < resultArray[k + 1].nb_match) {
+                                        tmp = resultArray[k];
+                                        resultArray[k] = resultArray[k + 1];
+                                        resultArray[k + 1] = tmp;
+                                    }
+                                    k++;
                                 }
-                                k++;
+                                len--;
                             }
-                            len--;
                         }
 
                         var i = 0;
                         var newTab = [];
                         var newTab2 = [];
-                        while (resultArray[i] && resultArray[i].nb_match > 0) {
+                        while (resultArray[i]) {
                             newTab[i] = resultArray[i].user;
                             i++;
                         }
-                        while (resultArray[i]) {
-                            newTab2[i] = resultArray[i].user;
-                            i++;
-                        }
+                        // while (resultArray[i]) {
+                        //     newTab2[i] = resultArray[i].user;
+                        //     i++;
+                        // }
 
                         if (!newTab[0])
                             res.render('filtred', {msg: "Je n'ai trouve personne pour vous :(", which: "none"});
                         else {
                             res.render('filtred', {
                                 items: newTab,
-                                which: "recherche " + age_min + " " + age_max + " " + zip + " " + tags
+                                which: "recherche " + age_min + " " + age_max + " " + zip + " " + popu_min + " " + popu_max + " " + tags
                             });
                         }
                     });
@@ -769,7 +770,7 @@ function recherche(req, res, sort, tags, age_min, age_max, zip, popu_min, popu_m
                         else {
                             res.render('filtred', {
                                 items: newTab,
-                                which: "recherche " + age_min + " " + age_max + " " + zip + " " + tags
+                                which: "recherche " + age_min + " " + age_max + " " + zip + " " + popu_min + " " + popu_max + " " + tags
                             });
                         }
                     });

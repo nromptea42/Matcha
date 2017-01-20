@@ -40,64 +40,74 @@ router.get('/', requireLogin, function(req, res, next) {
 });
 
 router.post('/things', requireLogin, function(req, res, next) {
-    if (!req.body.age_min || !req.body.age_max || !req.body.zip || !req.body.popu_min || !req.body.popu_max || !req.body.tags)
-        res.render('recherche', {msg: "Tous les champs doivent etre rempli"});
-    else {
-        if (Number.isInteger(Number(req.body.age_min)) && Number.isInteger(Number(req.body.age_max))
-            && Number.isInteger(Number(req.body.popu_min)) && Number.isInteger(Number(req.body.popu_max))) {
-            if (req.body.age_min <= req.body.age_max) {
-                if (req.session.user.need != "Les deux") {
-                    mongo.connect(url, function (err, db) {
-                        assert.equal(null, err);
 
-                        http.get({
-                            'host': 'maps.googleapis.com',
-                            'path': '/maps/api/geocode/json?address=' + S(req.body.zip).slugify().s + ",%20France"
-                        }, function (resp) {
-                            resp.on('data', function (maps_infos) {
-                                var y = JSON.parse(maps_infos);
-                                if (y.status == "OK") {
-                                    var splited = req.body.tags.split(" ");
-                                    var resultArray = [];
-                                    var cursor = db.collection('user-data').find({
-                                        sexe: req.session.user.need,
-                                        "age": {"$gte": String(req.body.age_min), "$lte": String(req.body.age_max)},
-                                        "popu": {"$gte": Number(req.body.popu_min), "$lte": Number(req.body.popu_max)},
-                                        "location": {
-                                            $near: {
-                                                $geometry: {
-                                                    type: "Point",
-                                                    coordinates: [Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
-                                                },
-                                                $maxDistance: 30000
-                                            }
+    if (!req.body.age_min)
+        req.body.age_min = 18;
+    if (!req.body.age_max)
+        req.body.age_max = 99;
+    if (!req.body.zip)
+        req.body.zip = "Paris";
+    if (!req.body.popu_min)
+        req.body.popu_min = 0;
+    if (!req.body.popu_max)
+        req.body.popu_max = 999999;
+
+    if (Number.isInteger(Number(req.body.age_min)) && Number.isInteger(Number(req.body.age_max))
+        && Number.isInteger(Number(req.body.popu_min)) && Number.isInteger(Number(req.body.popu_max))) {
+        if (req.body.age_min <= req.body.age_max) {
+            if (req.session.user.need != "Les deux") {
+                mongo.connect(url, function (err, db) {
+                    assert.equal(null, err);
+
+                    http.get({
+                        'host': 'maps.googleapis.com',
+                        'path': '/maps/api/geocode/json?address=' + S(req.body.zip).slugify().s + ",%20France"
+                    }, function (resp) {
+                        resp.on('data', function (maps_infos) {
+                            var y = JSON.parse(maps_infos);
+                            if (y.status == "OK") {
+                                var splited = req.body.tags.split(" ");
+                                var resultArray = [];
+                                var cursor = db.collection('user-data').find({
+                                    sexe: req.session.user.need,
+                                    "age": {"$gte": String(req.body.age_min), "$lte": String(req.body.age_max)},
+                                    "popu": {"$gte": Number(req.body.popu_min), "$lte": Number(req.body.popu_max)},
+                                    "location": {
+                                        $near: {
+                                            $geometry: {
+                                                type: "Point",
+                                                coordinates: [Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
+                                            },
+                                            $maxDistance: 30000
                                         }
-                                    }).sort({_id: -1});
-                                    cursor.forEach(function (doc, err) {
-                                        assert.equal(null, err);
-                                        if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
-                                            var i = 0;
-                                            var nb = 0;
-                                            var tag_split = doc.tags;
-                                            // console.log(tag_split);
-                                            while (splited[i]) {
-                                                var j = 0;
-                                                while (tag_split[j]) {
-                                                    // console.log(tag_split[j]);
-                                                    if (splited[i] == tag_split[j])
-                                                        nb++;
-                                                    j++;
-                                                }
-                                                i++;
+                                    }
+                                }).sort({_id: -1});
+                                cursor.forEach(function (doc, err) {
+                                    assert.equal(null, err);
+                                    if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                                        var i = 0;
+                                        var nb = 0;
+                                        var tag_split = doc.tags;
+                                        // console.log(tag_split);
+                                        while (splited[i]) {
+                                            var j = 0;
+                                            while (tag_split[j]) {
+                                                // console.log(tag_split[j]);
+                                                if (splited[i] == tag_split[j])
+                                                    nb++;
+                                                j++;
                                             }
-                                            var item = {
-                                                nb_match: nb,
-                                                user: doc
-                                            };
-                                            resultArray.push(item);
+                                            i++;
                                         }
-                                    }, function () {
-                                        db.close();
+                                        var item = {
+                                            nb_match: nb,
+                                            user: doc
+                                        };
+                                        resultArray.push(item);
+                                    }
+                                }, function () {
+                                    db.close();
+                                    if (req.body.tags) {
                                         len = resultArray.length;
                                         var tmp;
 
@@ -113,98 +123,103 @@ router.post('/things', requireLogin, function(req, res, next) {
                                             }
                                             len--;
                                         }
+                                    }
+                                    // console.log(resultArray);
 
-                                        var i = 0;
-                                        var newTab = [];
-                                        var newTab2 = [];
-                                        while (resultArray[i] && resultArray[i].nb_match > 0) {
-                                            newTab[i] = resultArray[i].user;
-                                            i++;
-                                        }
-                                        while (resultArray[i]) {
-                                            newTab2[i] = resultArray[i].user;
-                                            i++;
-                                        }
-                                        // console.log(newTab);
-                                        // console.log(newTab2);
+                                    var i = 0;
+                                    var newTab = [];
+                                    var newTab2 = [];
+                                    while (resultArray[i]) {
+                                        newTab[i] = resultArray[i].user;
+                                        i++;
+                                    }
+                                    // while (resultArray[i]) {
+                                    //     newTab2[i] = resultArray[i].user;
+                                    //     i++;
+                                    // }
+                                    // console.log(newTab);
+                                    // console.log(newTab2);
 
-                                        if (!newTab[0])
-                                            res.render('filtred', {
-                                                msg: "Je n'ai trouve personne pour vous :(",
-                                                which: "none"
-                                            });
-                                        else
-                                            res.render('filtred', {
-                                                items: newTab,
-                                                which: "recherche "
-                                                + req.body.age_min + " "
-                                                + req.body.age_max + " "
-                                                + req.body.zip + " "
-                                                + req.body.tags
-                                            });
-                                    });
-                                }
-                                else
-                                    res.render('recherche', {msg: "Les valeurs sont incorrects"});
-                            });
+
+                                    if (!newTab[0])
+                                        res.render('filtred', {
+                                            msg: "Je n'ai trouve personne pour vous :(",
+                                            which: "none"
+                                        });
+                                    else
+                                        res.render('filtred', {
+                                            items: newTab,
+                                            which: "recherche "
+                                            + req.body.age_min + " "
+                                            + req.body.age_max + " "
+                                            + req.body.zip + " "
+                                            + req.body.popu_min + " "
+                                            + req.body.popu_max + " "
+                                            + req.body.tags
+                                        });
+                                });
+                            }
+                            else
+                                res.render('recherche', {msg: "Les valeurs sont incorrects"});
                         });
                     });
-                }
-                else {
-                    mongo.connect(url, function (err, db) {
-                        assert.equal(null, err);
+                });
+            }
+            else {
+                mongo.connect(url, function (err, db) {
+                    assert.equal(null, err);
 
-                        http.get({
-                            'host': 'maps.googleapis.com',
-                            'path': '/maps/api/geocode/json?address=' + S(req.body.zip).slugify().s + ",%20France"
-                        }, function (resp) {
-                            resp.on('data', function (maps_infos) {
-                                var y = JSON.parse(maps_infos);
-                                if (y.status == "OK") {
-                                    var splited = req.body.tags.split(" ");
-                                    var resultArray = [];
-                                    var cursor = db.collection('user-data').find({
-                                        "need" : {$in: ["Les deux", req.session.user.sexe]},
-                                        "age": {"$gte": String(req.body.age_min), "$lte": String(req.body.age_max)},
-                                        "popu": {"$gte": Number(req.body.popu_min), "$lte": Number(req.body.popu_max)},
-                                        "location": {
-                                            $near: {
-                                                $geometry: {
-                                                    type: "Point",
-                                                    coordinates: [Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
-                                                },
-                                                $maxDistance: 30000
-                                            }
+                    http.get({
+                        'host': 'maps.googleapis.com',
+                        'path': '/maps/api/geocode/json?address=' + S(req.body.zip).slugify().s + ",%20France"
+                    }, function (resp) {
+                        resp.on('data', function (maps_infos) {
+                            var y = JSON.parse(maps_infos);
+                            if (y.status == "OK") {
+                                var splited = req.body.tags.split(" ");
+                                var resultArray = [];
+                                var cursor = db.collection('user-data').find({
+                                    "need" : {$in: ["Les deux", req.session.user.sexe]},
+                                    "age": {"$gte": String(req.body.age_min), "$lte": String(req.body.age_max)},
+                                    "popu": {"$gte": Number(req.body.popu_min), "$lte": Number(req.body.popu_max)},
+                                    "location": {
+                                        $near: {
+                                            $geometry: {
+                                                type: "Point",
+                                                coordinates: [Number(y.results[0].geometry.location.lng), Number(y.results[0].geometry.location.lat)]
+                                            },
+                                            $maxDistance: 30000
                                         }
-                                    }).sort({_id: -1});
-                                    cursor.forEach(function (doc, err) {
-                                        assert.equal(null, err);
-                                        if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
-                                            var i = 0;
-                                            var nb = 0;
-                                            var tag_split = doc.tags;
-                                            // console.log(tag_split);
-                                            while (splited[i]) {
-                                                var j = 0;
-                                                while (tag_split[j]) {
-                                                    // console.log(tag_split[j]);
-                                                    if (splited[i] == tag_split[j])
-                                                        nb++;
-                                                    j++;
-                                                }
-                                                i++;
+                                    }
+                                }).sort({_id: -1});
+                                cursor.forEach(function (doc, err) {
+                                    assert.equal(null, err);
+                                    if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                                        var i = 0;
+                                        var nb = 0;
+                                        var tag_split = doc.tags;
+                                        // console.log(tag_split);
+                                        while (splited[i]) {
+                                            var j = 0;
+                                            while (tag_split[j]) {
+                                                // console.log(tag_split[j]);
+                                                if (splited[i] == tag_split[j])
+                                                    nb++;
+                                                j++;
                                             }
-                                            var item = {
-                                                nb_match: nb,
-                                                user: doc
-                                            };
-                                            resultArray.push(item);
+                                            i++;
                                         }
-                                    }, function () {
-                                        db.close();
-                                        len = resultArray.length;
-                                        var tmp;
-
+                                        var item = {
+                                            nb_match: nb,
+                                            user: doc
+                                        };
+                                        resultArray.push(item);
+                                    }
+                                }, function () {
+                                    db.close();
+                                    len = resultArray.length;
+                                    var tmp;
+                                    if (req.body.tags) {
                                         while (len - 1 > 0) {
                                             var k = 0;
                                             while (resultArray[k + 1]) {
@@ -217,50 +232,50 @@ router.post('/things', requireLogin, function(req, res, next) {
                                             }
                                             len--;
                                         }
+                                    }
 
-                                        var i = 0;
-                                        var newTab = [];
-                                        var newTab2 = [];
-                                        while (resultArray[i] && resultArray[i].nb_match > 0) {
-                                            newTab[i] = resultArray[i].user;
-                                            i++;
-                                        }
-                                        while (resultArray[i]) {
-                                            newTab2[i] = resultArray[i].user;
-                                            i++;
-                                        }
-                                        // console.log(newTab);
-                                        // console.log(newTab2);
+                                    var i = 0;
+                                    var newTab = [];
+                                    var newTab2 = [];
+                                    while (resultArray[i]) {
+                                        newTab[i] = resultArray[i].user;
+                                        i++;
+                                    }
+                                    // while (resultArray[i]) {
+                                    //     newTab2[i] = resultArray[i].user;
+                                    //     i++;
+                                    // }
+                                    // console.log(newTab);
+                                    // console.log(newTab2);
 
-                                        if (!newTab[0])
-                                            res.render('filtred', {
-                                                msg: "Je n'ai trouve personne pour vous :(",
-                                                which: "none"
-                                            });
-                                        else
-                                            res.render('filtred', {
-                                                items: newTab,
-                                                which: "recherche "
-                                                + req.body.age_min + " "
-                                                + req.body.age_max + " "
-                                                + req.body.zip + " "
-                                                + req.body.popu_min + " "
-                                                + req.body.popu_max + " "
-                                                + req.body.tags
-                                            });
-                                    });
-                                }
-                                else
-                                    res.render('recherche', {msg: "Les valeurs sont incorrects"});
-                            });
+                                    if (!newTab[0])
+                                        res.render('filtred', {
+                                            msg: "Je n'ai trouve personne pour vous :(",
+                                            which: "none"
+                                        });
+                                    else
+                                        res.render('filtred', {
+                                            items: newTab,
+                                            which: "recherche "
+                                            + req.body.age_min + " "
+                                            + req.body.age_max + " "
+                                            + req.body.zip + " "
+                                            + req.body.popu_min + " "
+                                            + req.body.popu_max + " "
+                                            + req.body.tags
+                                        });
+                                });
+                            }
+                            else
+                                res.render('recherche', {msg: "Les valeurs sont incorrects"});
                         });
                     });
-                }
+                });
             }
         }
-        else
-            res.render('recherche', {msg: "Les valeurs sont incorrects"});
     }
+    else
+        res.render('recherche', {msg: "Les valeurs sont incorrects"});
 });
 
 module.exports = router;

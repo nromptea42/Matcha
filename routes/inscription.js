@@ -84,7 +84,7 @@ router.post('/insert', requireNonLogin, function(req, res, next) {
             if (!cursor) {
                 if (item.nom && item.prenom && item.age && item.email && mdp && mdp2) {
                     if (!isNaN(item.age)) {
-                        if (Number(item.age) >= 18) {
+                        if (Number(item.age) >= 18 && Number(item.age) < 99) {
                             if (mdp == mdp2) {
                                 if (regex(mdp) == "ok" && mdp.length >= 6) {
                                     item.salt = generateRandomString(20);
@@ -100,7 +100,7 @@ router.post('/insert', requireNonLogin, function(req, res, next) {
                                             db.close();
                                         });
                                     });
-                                    res.render('inscription', {message : "Inscription validée"});
+                                    res.redirect('/');
                                 }
                                 else
                                     res.render('inscription', {message : "Le mot de passe doit faire au moins 6 caractères et contenir un chiffre"});
@@ -109,7 +109,7 @@ router.post('/insert', requireNonLogin, function(req, res, next) {
                                 res.render('inscription', {message : "Les mots de passe doivent etre identiques"});
                         }
                         else
-                            res.render('inscription', {message : "Vous devez etre majeur pour vous inscrire."});
+                            res.render('inscription', {message : "Vous devez avoir l'age requis pour vous inscrire. Entre 18 et 99 ans"});
                     }
                     else
                         res.render('inscription', {message : "Votre age doit etre un nombre"});
