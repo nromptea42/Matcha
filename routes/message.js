@@ -61,39 +61,46 @@ router.get('/go', requireLogin, function(req, res, next) {
 
 router.get('/:id', requireLogin, function(req, res, next) {
 
-    mongo.connect(url, function (err, db) {
-        assert.equal(null, err);
-        db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
+    if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+        mongo.connect(url, function (err, db) {
+            assert.equal(null, err);
+            db.collection('user-data').findOne({_id: objectId(req.params.id)}).then(function (cursor) {
+
+                if (cursor) {
+                    if (req.session.user.liked.indexOf(String(cursor._id)) != -1
+                        && req.session.user.ban.indexOf(String(cursor._id)) == -1
+                        && cursor.liked.indexOf(String(req.session.user._id)) != -1
+                        && cursor.ban.indexOf(String(req.session.user_id)) == -1) {
 
 
-            if (req.session.user.liked.indexOf(String(cursor._id)) != -1
-                && req.session.user.ban.indexOf(String(cursor._id)) == -1
-                && cursor.liked.indexOf(String(req.session.user._id)) != -1
-                && cursor.ban.indexOf(String(req.session.user_id)) == -1) {
-
-
-                var datas = db.collection('messages').find({
-                    "expe": {$in: [String(req.session.user._id), String(cursor._id)]},
-                    "desti": {$in: [String(req.session.user._id), String(cursor._id)]}
-                });
-                var tab_msg = [];
-                datas.forEach(function (doc, err) {
-                    tab_msg.push({m: doc.message, n: doc.name});
-                }, function () {
-                    db.close();
-                    res.render('message', {
-                        exp: req.session.user._id,
-                        dest: cursor._id,
-                        message: tab_msg,
-                        name: req.session.user.prenom,
-                        name_dest: cursor.prenom
-                    });
-                });
-            }
-            else
-                res.redirect('/');
+                        var datas = db.collection('messages').find({
+                            "expe": {$in: [String(req.session.user._id), String(cursor._id)]},
+                            "desti": {$in: [String(req.session.user._id), String(cursor._id)]}
+                        });
+                        var tab_msg = [];
+                        datas.forEach(function (doc, err) {
+                            tab_msg.push({m: doc.message, n: doc.name});
+                        }, function () {
+                            db.close();
+                            res.render('message', {
+                                exp: req.session.user._id,
+                                dest: cursor._id,
+                                message: tab_msg,
+                                name: req.session.user.prenom,
+                                name_dest: cursor.prenom
+                            });
+                        });
+                    }
+                    else
+                        res.redirect('/');
+                }
+                else
+                    res.redirect('/');
+            });
         });
-    });
+    }
+    else
+        res.redirect('/');
 });
 
 module.exports = router;

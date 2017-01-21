@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Oui</title>
     <link rel="stylesheet" href="/public/stylesheets/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
@@ -23,7 +24,7 @@
                 <li><a href="/logout">Logout</a></li>
             </ul>
         </div>
-        <img class="burger" src="http://www.pngall.com/wp-content/uploads/2016/05/Burger-Free-Download-PNG.png">
+        <img class="burger" src="/public/Burger-Free-Download-PNG.png">
     </nav>
 </div>
 
@@ -47,10 +48,8 @@
 
 <script>
 
-    window.onload = function() {
-        handleMyBurger();
-        handleResize();
-    };
+    handleMyBurger();
+    handleResize();
 
 
     function handleMyBurger () {
