@@ -35,3 +35,30 @@
     width: 13px;
     height: auto;
 }
+
+.foot {
+    position: fixed;
+    bottom: 0;
+    width: 100%
+}
+
+.burger {
+    height: 28px;
+    display: none;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+
+@media(max-width: 643px) {
+    nav {  
+        height: 56px;
+        overflow: hidden;
+        transition: 0.3s;
+    }
+    
+    .burger {
+        display: initial;
+    }
+}

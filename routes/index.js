@@ -241,6 +241,8 @@ router.post('/email', function(req, res, next) {
 router.get('/getId', function(req, res, next) {
     if (req.session.user)
         res.send(req.session.user);
+    else
+        res.send("error");
 });
 
 module.exports = router;

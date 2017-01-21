@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang=""en>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Oui</title>
@@ -23,19 +23,53 @@
                 <li><a href="/logout">Logout</a></li>
             </ul>
         </div>
+        <img class="burger" src="http://www.pngall.com/wp-content/uploads/2016/05/Burger-Free-Download-PNG.png">
     </nav>
 </div>
 
 <body  class="padding">
-    <div class="container">
-        {{{ body }}}
+<div class="container">
+    {{{ body }}}
+</div>
+
+<footer class="page-footer foot">
+    <div class="footer-copyright">
+        <div class="container">
+            © 2017 nromptea@student.42.fr
+        </div>
     </div>
+</footer>
+
 </body>
 </html>
 
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
+
+    window.onload = function() {
+        handleMyBurger();
+        handleResize();
+    };
+
+
+    function handleMyBurger () {
+        $('.burger').bind("click", function () {
+           if ($('nav').height() == 56) {
+               $('nav').css ({'height': '170px'});
+           }
+           else
+               $('nav').css ({'height': '56px'});
+        });
+    }
+
+    function handleResize () {
+        $(window).resize(function() {
+            if ($(window).width() > 643)
+                $('nav').css ({'height': '56px'});
+        });
+    }
+
     function sendToast () {
         var msg = Number(document.getElementById("newbadge").textContent) + 1;
         document.getElementById("newbadge").textContent=String(msg);
@@ -47,27 +81,30 @@
     var socket = io();
     var xir;
     $.ajax({
-       'method'     : 'GET',
+        'method'     : 'GET',
         'url'       : '/getId',
-        'success'   : function(data){
-            xir = data._id;
-            socket.on(xir, function(msg) {
-                if (window.location.pathname.slice(0, 9) != "/message/" && msg.chat) {
-                    Materialize.toast(msg.msg, 6000,'', sendToastmsg());
-                }
-                else if (!msg.chat)
-                    Materialize.toast(msg.msg, 6000,'', sendToast());
-            });
+        'success'   : function(data) {
+            if (data != "error") {
+                xir = data._id;
+                socket.on(xir, function (msg) {
+                    if (window.location.pathname.slice(0, 9) != "/message/" && msg.chat) {
+                        Materialize.toast(msg.msg, 6000, '', sendToastmsg());
+                    }
+                    else if (!msg.chat)
+                        Materialize.toast(msg.msg, 6000, '', sendToast());
+                });
+            }
         }
     });
     $.ajax({
-       'method' : 'GET',
+        'method' : 'GET',
         'url'   : '/getId',
         'success' : function (data) {
-//           console.log(data);
-           document.getElementById("newbadge").textContent=String(data.nb_notif);
-           document.getElementById("newbadge2").textContent=String(data.nb_msg);
-           socket.emit('which_user', data._id);
+            if (data != "error") {
+                document.getElementById("newbadge").textContent = String(data.nb_notif);
+                document.getElementById("newbadge2").textContent = String(data.nb_msg);
+                socket.emit('which_user', data._id);
+            }
         }
     });
 </script>
