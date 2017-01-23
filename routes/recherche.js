@@ -81,10 +81,13 @@ router.post('/things', requireLogin, function(req, res, next) {
                                             $maxDistance: 30000
                                         }
                                     }
-                                }).sort({_id: -1});
+                                }).sort({popu: -1});
                                 cursor.forEach(function (doc, err) {
                                     assert.equal(null, err);
-                                    if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                                    if (String(doc._id) != String(req.session.user._id)
+                                        && req.session.user.ban.indexOf(String(doc._id)) == -1
+                                        && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
+
                                         var i = 0;
                                         var nb = 0;
                                         var tag_split = doc.tags;

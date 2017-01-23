@@ -108,7 +108,9 @@ router.get('/', requireLogin, function(req, res, next) {
                 }).sort({popu: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
-                    if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                    if (String(doc._id) != String(req.session.user._id)
+                        && req.session.user.ban.indexOf(String(doc._id)) == -1
+                        && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
                         resultArray.push(doc);
                     }
                 }, function () {

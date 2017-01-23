@@ -61,7 +61,9 @@ router.post('/age', requireLogin, function(req, res, next) {
                 }).sort({_id: -1});
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
-                    if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                    if (String(doc._id) != String(req.session.user._id)
+                        && req.session.user.ban.indexOf(String(doc._id)) == -1
+                        && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
                         resultArray.push(doc);
                     }
                 }, function () {
@@ -141,7 +143,9 @@ router.post('/region', requireLogin, function(req, res, next) {
                         }).sort({_id: -1});
                         cursor.forEach(function (doc, err) {
                             assert.equal(null, err);
-                            if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                            if (String(doc._id) != String(req.session.user._id)
+                                && req.session.user.ban.indexOf(String(doc._id)) == -1
+                                && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
                                 resultArray.push(doc);
                             }
                         }, function () {
@@ -209,7 +213,9 @@ router.post('/tags', requireLogin, function(req, res, next) {
             }).sort({_id: -1});
             cursor.forEach(function (doc, err) {
                 assert.equal(null, err);
-                if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                if (String(doc._id) != String(req.session.user._id)
+                    && req.session.user.ban.indexOf(String(doc._id)) == -1
+                    && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
                     var i = 0;
                     var nb = 0;
                     var tag_split = doc.tags;
@@ -364,7 +370,9 @@ router.post('/popularite', requireLogin, function(req, res, next) {
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
                     console.log("coucou");
-                    if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                    if (String(doc._id) != String(req.session.user._id)
+                        && req.session.user.ban.indexOf(String(doc._id)) == -1
+                        && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
                         resultArray.push(doc);
                     }
                 }, function () {

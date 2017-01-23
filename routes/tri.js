@@ -51,7 +51,9 @@ function get_index(req, res, sort) {
             }).sort(sort);
             cursor.forEach(function (doc, err) {
                 assert.equal(null, err);
-                if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                if (String(doc._id) != String(req.session.user._id)
+                    && req.session.user.ban.indexOf(String(doc._id)) == -1
+                    && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
                     resultArray.push(doc);
                 }
             }, function () {
@@ -113,7 +115,9 @@ function get_age(req, res, age_min, age_max, sort) {
                 }).sort(sort);
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
-                    if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                    if (String(doc._id) != String(req.session.user._id)
+                        && req.session.user.ban.indexOf(String(doc._id)) == -1
+                        && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
                         resultArray.push(doc);
                     }
                 }, function () {
@@ -185,7 +189,9 @@ function get_popu(req, res, popu_min, popu_max, sort) {
                 }).sort(sort);
                 cursor.forEach(function (doc, err) {
                     assert.equal(null, err);
-                    if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                    if (String(doc._id) != String(req.session.user._id)
+                        && req.session.user.ban.indexOf(String(doc._id)) == -1
+                        && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
                         resultArray.push(doc);
                     }
                 }, function () {
@@ -257,7 +263,9 @@ function get_tags(req, res, str, sort) {
             }).sort(sort);
             cursor.forEach(function (doc, err) {
                 assert.equal(null, err);
-                if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                if (String(doc._id) != String(req.session.user._id)
+                    && req.session.user.ban.indexOf(String(doc._id)) == -1
+                    && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
                     var i = 0;
                     var nb = 0;
                     var tag_split = doc.tags;
@@ -378,7 +386,9 @@ function get_region(req, res, zip, sort) {
                     }).sort(sort);
                     cursor.forEach(function (doc, err) {
                         assert.equal(null, err);
-                        if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                        if (String(doc._id) != String(req.session.user._id)
+                            && req.session.user.ban.indexOf(String(doc._id)) == -1
+                            && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
                             resultArray.push(doc);
                         }
                     }, function () {
@@ -454,7 +464,9 @@ function tags_sort(req, res, sort, age_min, age_max, yes, coord) {
             }).sort(sort);
             cursor.forEach(function (doc, err) {
                 assert.equal(null, err);
-                if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                if (String(doc._id) != String(req.session.user._id)
+                    && req.session.user.ban.indexOf(String(doc._id)) == -1
+                    && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
                     var i = 0;
                     var nb = 0;
                     var tag_split = doc.tags;
@@ -625,7 +637,10 @@ function recherche(req, res, sort, tags, age_min, age_max, zip, popu_min, popu_m
                     }).sort(sort);
                     cursor.forEach(function (doc, err) {
                         assert.equal(null, err);
-                        if (String(doc._id) != String(req.session.user._id) && req.session.user.ban.indexOf(String(doc._id)) == -1) {
+                        if (String(doc._id) != String(req.session.user._id)
+                            && req.session.user.ban.indexOf(String(doc._id)) == -1
+                            && [req.session.user.sexe, "Les deux"].indexOf(doc.need) != -1 ) {
+
                             var i = 0;
                             var nb = 0;
                             var tag_split = doc.tags;
@@ -842,7 +857,7 @@ router.post('/tags', requireLogin, function(req, res, next) {
     var trim = S(req.body.which).trim().s;
     var array = trim.split(" ");
     console.log(array);
-    var sort = {_id: -1};
+    var sort = {popu: -1};
     var coord = [req.session.user.location.coordinates[0], req.session.user.location.coordinates[1]];
 
     if (array[0] == "none")
